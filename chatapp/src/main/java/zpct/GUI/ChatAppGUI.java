@@ -75,7 +75,12 @@ public class ChatAppGUI extends JFrame {
         sendButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                sendMessage();
+                try {
+                    sendMessage();
+                } catch (IOException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
             }
         });
 
@@ -93,10 +98,12 @@ public class ChatAppGUI extends JFrame {
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
-    void sendMessage() {
+    void sendMessage() throws IOException {
         String message = messageField.getText();
         if (!message.isEmpty()) {
             chatArea.append("You: " + message + "\n");
+            output.write(message.getBytes());
+			output.flush();
             // Include logic here to send the message to the other user or chat server
             // For simplicity, just displaying the sent message in the chatArea
             messageField.setText("");

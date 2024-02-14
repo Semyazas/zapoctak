@@ -16,7 +16,8 @@ import server.Server.*;
 public class ServerApp 
 {
 public static void main(String[] args) {
-        try {
+    Server s = new Server();
+      /*   try {
             ServerSocket serverSocket = new ServerSocket(12345);
             System.out.println("Server is waiting for a client to connect...");
 
@@ -95,6 +96,6 @@ public static void main(String[] args) {
             size -= bytes;      // read upto file size
         }
         System.out.println("ja ne ");
-        fileOutputStream.close();
+        fileOutputStream.close();*/
     }
 }
