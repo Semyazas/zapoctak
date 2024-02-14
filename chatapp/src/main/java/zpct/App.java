@@ -3,7 +3,6 @@ package zpct;
 import javax.swing.SwingUtilities;
 
 import zpct.GUI.ChatAppGUI;
-import zpct.client.Client;
 
 
 /**
@@ -12,7 +11,6 @@ import zpct.client.Client;
  */
 public class App {
     public static void main( String[] args ) {
-        Client c = new Client(null, 0);
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {

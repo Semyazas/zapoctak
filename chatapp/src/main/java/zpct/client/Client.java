@@ -26,7 +26,7 @@ public class Client {
 		try	{ 
 			 // Create a thread to handle messages from the server
 			socket = new Socket("localhost", 12345);
-			 System.out.println("Connected to server: " + socket);
+			System.out.println("Connected to server: " + socket);
  
 			input = socket.getInputStream();
 			output = new DataOutputStream(socket.getOutputStream());

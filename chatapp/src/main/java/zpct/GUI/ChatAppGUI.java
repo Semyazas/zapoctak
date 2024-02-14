@@ -4,10 +4,20 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 public class ChatAppGUI extends JFrame {
     private JTextArea chatArea;
     private JTextField messageField;
+
+    
+	Socket socket;
+	InputStream input;
+	DataOutputStream output;
 
     public ChatAppGUI() {
         // Set up the JFrame
@@ -20,6 +30,32 @@ public class ChatAppGUI extends JFrame {
 
         // Display the GUI
         setVisible(true);
+
+        try {
+            
+			 // Create a thread to handle messages from the server
+			socket = new Socket("localhost", 12345);
+            writeMessage("připojil jste se ");
+            
+			input = socket.getInputStream();
+			output = new DataOutputStream(socket.getOutputStream());
+ 
+            Thread serverThread = new Thread(() -> {
+				handle_recieving_messages();
+            });
+
+            serverThread.start(); // Start the server thread
+
+            // Allow the client to send messages and files to the server
+        }
+		catch(UnknownHostException u) { 
+			System.out.println(u); 
+		} 
+		catch(IOException i) { 
+			System.out.println(i); 
+            System.out.println("server je vypnutý");
+            return; 
+        }
     }
     private void setupJFrame() {
         setTitle("Chat App");
@@ -33,6 +69,7 @@ public class ChatAppGUI extends JFrame {
         chatArea.setEditable(false);
         messageField = new JTextField();
     }
+
     private void setupLayout() {
         JButton sendButton = new JButton("Send");
         sendButton.addActionListener(new ActionListener() {
@@ -65,4 +102,33 @@ public class ChatAppGUI extends JFrame {
             messageField.setText("");
         }
     }
+
+    void writeMessage(String message) {
+        if (!message.isEmpty()) {
+            chatArea.append("Server: " + message + "\n");
+            // Include logic here to send the message to the other user or chat server
+            // For simplicity, just displaying the sent message in the chatArea
+            messageField.setText("");
+        }
+    }
+
+    public void handle_recieving_messages() {
+		try {
+			while (true) {
+				// Read messages from the server
+				byte[] buffer = new byte[1024];
+				int bytesRead = input.read(buffer);
+				if (bytesRead == -1) {
+					break; // End of stream, server has disconnected
+				}
+				// Check if the message is a file
+				else {
+					String message = new String(buffer, 0, bytesRead);
+					writeMessage(message);
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }
