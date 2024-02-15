@@ -5,6 +5,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.Socket;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -16,7 +21,18 @@ public class LoginRegistrationGUI extends JFrame {
     private JPasswordField passwordField;
     public boolean logged = false;
 
-    public LoginRegistrationGUI() {
+    Socket socket; 
+    InputStream input;
+                      
+    DataOutputStream output;
+
+    public LoginRegistrationGUI(Socket s, InputStream i,
+                      DataOutputStream o) {
+
+        socket = s; 
+        input = i;                        
+        output = o;
+        
         setTitle("Login");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(300, 150);
@@ -50,6 +66,16 @@ public class LoginRegistrationGUI extends JFrame {
                 // Implement login functionality here
                 String username = usernameField.getText();
                 char[] password = passwordField.getPassword();
+
+                String pswd = String.valueOf(password);
+                try {
+                    output.write((username + " " +pswd).getBytes());
+                    output.flush();
+                } catch (IOException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+
                 // Add your login logic here
                 JOptionPane.showMessageDialog(LoginRegistrationGUI.this, "Login button clicked");
                 logged = true;
@@ -86,16 +112,19 @@ public class LoginRegistrationGUI extends JFrame {
         JTextField usernameField = new JTextField(20);
         JPasswordField passwordField = new JPasswordField(20);
         JTextField nameField = new JTextField(20);
+        JTextField surnameField = new JTextField(20);
         JButton registerButton = new JButton("Register");
 
         // Create panels for registration window
-        JPanel registrationPanel = new JPanel(new GridLayout(3, 2));
+        JPanel registrationPanel = new JPanel(new GridLayout(4, 2));
         registrationPanel.add(new JLabel("Username:"));
         registrationPanel.add(usernameField);
         registrationPanel.add(new JLabel("Password:"));
         registrationPanel.add(passwordField);
         registrationPanel.add(new JLabel("Name:"));
         registrationPanel.add(nameField);
+        registrationPanel.add(new JLabel("Surname:"));
+        registrationPanel.add(surnameField);
 
         JPanel registrationButtonPanel = new JPanel();
         registrationButtonPanel.add(registerButton);
@@ -107,7 +136,10 @@ public class LoginRegistrationGUI extends JFrame {
                 // Implement registration functionality here
                 String username = usernameField.getText();
                 char[] password = passwordField.getPassword();
+                String pswd = password.toString();
                 String name = nameField.getText();
+
+                
                 // Add your registration logic here
                 JOptionPane.showMessageDialog(registrationFrame, "Registration button clicked");
                 logged = true;

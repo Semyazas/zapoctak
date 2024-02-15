@@ -44,6 +44,8 @@ public class Server {
     private static class ClientHandler implements Runnable { 
         private final Socket clientSocket; 
         boolean logged;
+        String userName;
+        String passWord;
   
         // Constructor 
         public ClientHandler(Socket socket) { 
@@ -62,7 +64,7 @@ public class Server {
                 input = new DataInputStream(clientSocket.getInputStream());
                 output = new DataOutputStream(clientSocket.getOutputStream());
                 handle_recieving_messages(input);
-            } finally {
+            } catch (IOException e) {
                 System.out.println("Connection lost");
                 return;
             }
@@ -74,11 +76,32 @@ public class Server {
                 int bytesRead = input.read(buffer);
                 if (bytesRead == -1) {
                     break; // End of stream, client has disconnected
-                } else {
-                    String message = new String(buffer, 0, bytesRead);
-                    System.out.println("Client: " + message);
+                } 
+                String message = new String(buffer, 0, bytesRead);
+                System.out.println("Client: " + message);
+
+                if (!logged) { // At first I expect correct output
+                    String[] tokens = message.split("\\s+");
+                    userName = tokens[0];
+                    passWord = tokens[1];
+                    System.out.println("Client registered: his name is "+ userName + " and his password is: " + passWord);
+                    logged = true;
                 }
             }
+        }
+        public boolean is_registered() {
+            return false;
+        }
+        public boolean correct_password() {
+            return false;
+        }
+
+        public void register_user() {
+
+        }
+
+        public void log_user() {
+
         }
     } 
 }

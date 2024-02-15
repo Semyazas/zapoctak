@@ -25,7 +25,7 @@ public class App {
 			input = socket.getInputStream();
 			output = new DataOutputStream(socket.getOutputStream());
 
-            LoginRegistrationGUI l = new LoginRegistrationGUI();
+            LoginRegistrationGUI l = new LoginRegistrationGUI(socket, input, output);
             while (l.logged == false) {         // todle je kinda prasárna, ale tak it is what it is
                 System.out.println("aaa");
             }

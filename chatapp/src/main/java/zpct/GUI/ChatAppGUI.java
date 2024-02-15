@@ -19,8 +19,12 @@ public class ChatAppGUI extends JFrame {
 	InputStream input;
 	DataOutputStream output;
 
-    public ChatAppGUI(Socket socket, InputStream input,
-                      DataOutputStream output) {
+    public ChatAppGUI(Socket s, InputStream i,
+                      DataOutputStream o) {
+        socket = s;
+        input  = i;
+        output = o;
+
         // Set up the JFrame
         setupJFrame();
         // Create components
