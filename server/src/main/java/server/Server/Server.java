@@ -43,10 +43,12 @@ public class Server {
     
     private static class ClientHandler implements Runnable { 
         private final Socket clientSocket; 
+        boolean logged;
   
         // Constructor 
         public ClientHandler(Socket socket) { 
-            this.clientSocket = socket; 
+            this.clientSocket = socket;
+            logged =false; 
         } 
         
         public void run()    { 

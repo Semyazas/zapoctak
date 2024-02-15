@@ -19,7 +19,8 @@ public class ChatAppGUI extends JFrame {
 	InputStream input;
 	DataOutputStream output;
 
-    public ChatAppGUI() {
+    public ChatAppGUI(Socket socket, InputStream input,
+                      DataOutputStream output) {
         // Set up the JFrame
         setupJFrame();
         // Create components
@@ -30,32 +31,16 @@ public class ChatAppGUI extends JFrame {
 
         // Display the GUI
         setVisible(true);
-
-        try {
-            
-			 // Create a thread to handle messages from the server
-			socket = new Socket("localhost", 12345);
-            writeMessage("připojil jste se ");
-            
-			input = socket.getInputStream();
-			output = new DataOutputStream(socket.getOutputStream());
+         
+	    // Create a thread to handle messages from the server
  
-            Thread serverThread = new Thread(() -> {
+        Thread serverThread = new Thread(() -> {
 				handle_recieving_messages();
-            });
-
-            serverThread.start(); // Start the server thread
+        });
+        serverThread.start(); // Start the server thread
 
             // Allow the client to send messages and files to the server
-        }
-		catch(UnknownHostException u) { 
-			System.out.println(u); 
-		} 
-		catch(IOException i) { 
-			System.out.println(i); 
-            System.out.println("server je vypnutý");
-            return; 
-        }
+        
     }
     private void setupJFrame() {
         setTitle("Chat App");
