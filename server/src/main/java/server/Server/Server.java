@@ -3,14 +3,21 @@ package server.Server;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class Server {
 
     ServerSocket server;
     DataInputStream input;
     DataOutputStream output;
+    BufferedWriter writer;
+    static Scanner sc;
 
-    public Server() {
+    public Server() throws IOException {
+
+        sc = new Scanner(new File("C:\\Users\\marti\\OneDrive\\Plocha\\bin_tree.java\\zapoctak\\server\\data\\data.txt"));
+        writer = new BufferedWriter(new FileWriter("C:\\Users\\marti\\OneDrive\\Plocha\\bin_tree.java\\zapoctak\\server\\data\\data.txt", true));
+
         try {
             // server is listening on port 1234 
             server = new ServerSocket(12345); 
@@ -54,7 +61,7 @@ public class Server {
         } 
         
         public void run()    { 
-            final DataOutputStream output ;
+            final DataOutputStream output;
             final DataInputStream input;
 
             try {      
@@ -89,15 +96,16 @@ public class Server {
                 }
             }
         }
-        public boolean is_registered() {
+        public boolean is_registered(String tokens) {
+            
             return false;
         }
         public boolean correct_password() {
             return false;
         }
 
-        public void register_user() {
-
+        public void register_user(String[] data) {
+            
         }
 
         public void log_user() {
