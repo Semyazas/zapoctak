@@ -22,8 +22,7 @@ public class LoginRegistrationGUI extends JFrame {
     public boolean logged = false;
 
     Socket socket; 
-    InputStream input;
-                      
+    InputStream input;                  
     DataOutputStream output;
 
     public LoginRegistrationGUI(Socket s, InputStream i,
@@ -75,7 +74,6 @@ public class LoginRegistrationGUI extends JFrame {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
                 }
-
                 // Add your login logic here
                 JOptionPane.showMessageDialog(LoginRegistrationGUI.this, "Login button clicked");
                 logged = true;
@@ -136,10 +134,16 @@ public class LoginRegistrationGUI extends JFrame {
                 // Implement registration functionality here
                 String username = usernameField.getText();
                 char[] password = passwordField.getPassword();
-                String pswd = password.toString();
-                String name = nameField.getText();
-
-                
+                String pswd = String.valueOf(password);
+                String name     = nameField.getText();
+                String surname  = surnameField.getText();
+                try {
+                    output.write((username + " " +pswd +" " + name + " " + surname).getBytes());
+                    output.flush();
+                } catch (IOException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
                 // Add your registration logic here
                 JOptionPane.showMessageDialog(registrationFrame, "Registration button clicked");
                 logged = true;

@@ -8,7 +8,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
 public class ChatAppGUI extends JFrame {
     private JTextArea chatArea;
@@ -37,7 +36,6 @@ public class ChatAppGUI extends JFrame {
         setVisible(true);
          
 	    // Create a thread to handle messages from the server
- 
         Thread serverThread = new Thread(() -> {
 				handle_recieving_messages();
         });
