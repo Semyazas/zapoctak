@@ -3,6 +3,8 @@ package server.Server;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class Server {
@@ -10,9 +12,10 @@ public class Server {
     ServerSocket server;
     DataInputStream input;
     static DataOutputStream output;
+    HashMap<String,ClientHandler> username_clientHandler;
 
     public Server() throws IOException {
-
+        username_clientHandler = new HashMap<>();
         try {
             // server is listening on port 1234 
             server = new ServerSocket(12345); 
@@ -32,7 +35,7 @@ public class Server {
                                          .getHostAddress()); 
   
                 ClientHandler clientSock 
-                    = new ClientHandler(client); 
+                    = new ClientHandler(client,username_clientHandler); 
 
                 new Thread(clientSock).start(); 
             }  
@@ -47,13 +50,18 @@ public class Server {
         String userName;
         String passWord;
         registrator registration_handler;
+        HashMap<String,ClientHandler> chatters;
   
         // Constructor 
-        public ClientHandler(Socket socket) throws IOException { 
+        public ClientHandler(Socket socket, HashMap<String,ClientHandler> ch) throws IOException { 
             this.clientSocket = socket;
             registration_handler = new registrator("C:\\Users\\marti\\OneDrive\\Plocha\\bin_tree.java\\zapoctak\\server\\data\\data.txt");
+            chatters = ch;
         } 
-        
+        public Socket getSocket() {
+            return clientSocket;
+        }
+
         public void run()    { 
             final DataOutputStream output;
             final DataInputStream input;
@@ -85,11 +93,38 @@ public class Server {
                     String[] tokens = message.split("\\s+");
                     userName = tokens[0];
                     passWord = tokens[1];
+                    chatters.put(userName, this);
                     registration_handler.log_user(tokens, userName,passWord,output);
                 } else {
-
+                    handle_sending_messages(message);
+                    // TODO: handle messages ... basic logika .. 
                 }
             }
+        }
+        public void handle_messaging_request() {
+
+        }
+        
+        public void handle_sending_messages(String message) throws IOException {
+            String[] tokens = message.split("\\s+");
+            String targer_client_username = tokens[0];
+            String mess_string = ""; 
+            
+            // we will re-build message
+            for (int i = 1; i < tokens.length; i ++) {
+                mess_string+= tokens[i] + " ";
+            }
+
+            ClientHandler c = chatters.get(targer_client_username);
+
+            Socket socket = c.getSocket();
+        
+            // Sending the response back to the client.
+            // Note: Ideally you want all these in a try/catch/finally block
+            OutputStream os = socket.getOutputStream();
+            DataOutputStream osw = new DataOutputStream(os);
+            osw.write(mess_string.getBytes());
+            osw.flush();
         }
     } 
 }

@@ -9,14 +9,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import server.Server.*;
-/**
- * Hello world!
- *
- */
-public class ServerApp 
-{
-public static void main(String[] args) throws IOException {
-    Server s = new Server();
 
+public class ServerApp {
+    public static void main(String[] args) throws IOException {
+        Server s = new Server();
     }
 }

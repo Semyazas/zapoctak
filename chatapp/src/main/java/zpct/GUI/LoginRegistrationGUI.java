@@ -147,6 +147,7 @@ public class LoginRegistrationGUI extends JFrame {
                 // Add your registration logic here
                 JOptionPane.showMessageDialog(registrationFrame, "Registration button clicked");
                 logged = true;
+                registrationFrame.dispose();
             }
         });
 
@@ -157,5 +158,7 @@ public class LoginRegistrationGUI extends JFrame {
 
         // Make the registration frame visible
         registrationFrame.setVisible(true);
+
+        // TODO: vyčisti pro tendle file .. je to mess
     }
 }

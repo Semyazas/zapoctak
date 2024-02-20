@@ -59,7 +59,7 @@ public class registrator {
     }
 
     public void register_user(String[] data) throws IOException { // první v registraci username, pak password, pak name ... např: user1;123;Karel Novak;
-            // Append a new line to the file
+       // Append a new line to the file
         for(int i = 0; i < data.length; i++) {
             writer.write(data[i] + ";");
         }
@@ -74,7 +74,12 @@ public class registrator {
         System.out.println("Client: his username is "+ userName + " and his password is: " + passWord);
         if (tokens.length == 4) {
             register_user(tokens);
-        } else if (tokens.length == 2){
+            logged = true;
+            System.out.println("Client: " + userName + " registered succesfully");
+            output.write("LOGIN SUCCESSFULL".getBytes());
+            output.flush();
+        } 
+        else if (tokens.length == 2) {
             if (correct_password(tokens)) {
                 logged = true;
                 System.out.println("Client: " + userName + " logged in succesfully");

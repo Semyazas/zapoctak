@@ -24,13 +24,8 @@ public class App {
             
 			input = socket.getInputStream();
 			output = new DataOutputStream(socket.getOutputStream());
-
-            LoginRegistrationGUI l = new LoginRegistrationGUI(socket, input, output);
-            while (l.logged == false) {         // todle je kinda prasárna, ale tak it is what it is
-                System.out.println("aaa");
-            }
-            logIn(l);
-            System.out.println(l.logged);
+  
+            logIn();
 
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
@@ -47,11 +42,12 @@ public class App {
             System.out.println("server je vypnutý");
             return; 
         }
+        // TODO: oprav registraci ... bug: pokud se zaregistruju, tak registrace nezmizí
     }
-    public static void logIn( LoginRegistrationGUI l) throws IOException {
+    public static void logIn() throws IOException {
         while (true) {
             // Read messages from the client
-            l = new LoginRegistrationGUI(socket, input, output);
+            LoginRegistrationGUI l = new LoginRegistrationGUI(socket, input, output);
 
             byte[] buffer = new byte[1024];
             int bytesRead = input.read(buffer);
