@@ -15,6 +15,7 @@ public class Server {
     HashMap<String,ClientHandler> username_clientHandler;
 
     public Server() throws IOException {
+        this.input = null;
         username_clientHandler = new HashMap<>();
         try {
             // server is listening on port 1234 
@@ -45,35 +46,41 @@ public class Server {
         }
     }
     
-    private static class ClientHandler implements Runnable { 
-        private final Socket clientSocket; 
+    public class ClientHandler implements Runnable { 
+
         String userName;
         String passWord;
         registrator registration_handler;
         HashMap<String,ClientHandler> chatters;
+
+        private final DataOutputStream output;
+        private final DataInputStream input;
+        private final Socket clientSocket; 
+
+        private final int MSG_REQUEST_CORRECT   = 0;
+        private final int MSG_REQUEST_INCORRECT = 1;
+        private final int MSG                   = 2;
   
         // Constructor 
-        public ClientHandler(Socket socket, HashMap<String,ClientHandler> ch) throws IOException { 
+        ClientHandler(Socket socket, HashMap<String,ClientHandler> ch) throws IOException { 
             this.clientSocket = socket;
             registration_handler = new registrator("C:\\Users\\marti\\OneDrive\\Plocha\\bin_tree.java\\zapoctak\\server\\data\\data.txt");
             chatters = ch;
+            input = new DataInputStream(clientSocket.getInputStream());
+            output = new DataOutputStream(clientSocket.getOutputStream());
         } 
         public Socket getSocket() {
             return clientSocket;
         }
 
         public void run()    { 
-            final DataOutputStream output;
-            final DataInputStream input;
 
             try {      
                   // get the outputstream of client 
                 System.out.println("Client connected: " + clientSocket);
-      
-                input = new DataInputStream(clientSocket.getInputStream());
-                output = new DataOutputStream(clientSocket.getOutputStream());
                 handle_recieving_messages(input,output);
             } catch (IOException e) {
+                chatters.remove(userName);
                 System.out.println("Connection lost");
                 return;
             }
@@ -96,19 +103,36 @@ public class Server {
                     chatters.put(userName, this);
                     registration_handler.log_user(tokens, userName,passWord,output);
                 } else {
-                    handle_sending_messages(message);
+                    int podm = handle_chatWindow_request(message);
+                    if (podm==MSG) {
+                        System.out.println("funguju");
+                        handle_sending_messages(message);
+                    }
                     // TODO: handle messages ... basic logika .. 
                 }
             }
         }
-        public void handle_messaging_request() {
+        /*If client with whom this client wants to communicate is up,
+         *than send signal to open new chat window.
+        */
+        public int handle_chatWindow_request(String message) throws IOException { 
+            String[] tokens = message.split("\\s+");
+            if (tokens[0].equals("req")) {
+                if ( chatters.containsKey(tokens[1])) {
+                    output.write(("acc " + userName + " " + tokens[1]).getBytes());
+                    output.flush();
+                    return MSG_REQUEST_CORRECT;
+                } else {
+                    return MSG_REQUEST_INCORRECT;
+                }
+            } 
+            return MSG;
+        }   
 
-        }
-        
         public void handle_sending_messages(String message) throws IOException {
             String[] tokens = message.split("\\s+");
             String targer_client_username = tokens[0];
-            String mess_string = ""; 
+            String mess_string = userName + " "; 
             
             // we will re-build message
             for (int i = 1; i < tokens.length; i ++) {
@@ -118,7 +142,6 @@ public class Server {
             ClientHandler c = chatters.get(targer_client_username);
 
             Socket socket = c.getSocket();
-        
             // Sending the response back to the client.
             // Note: Ideally you want all these in a try/catch/finally block
             OutputStream os = socket.getOutputStream();

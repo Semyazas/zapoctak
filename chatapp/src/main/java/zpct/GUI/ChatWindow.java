@@ -1,6 +1,9 @@
 package zpct.GUI;
 
 import javax.swing.*;
+
+import javafx.scene.control.SplitMenuButton;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,20 +12,24 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 
-public class ChatAppGUI extends JFrame {
+public class ChatWindow extends JFrame {
     private JTextArea chatArea;
     private JTextField messageField;
+    String from;
+    String to;
 
     
 	Socket socket;
 	InputStream input;
 	DataOutputStream output;
 
-    public ChatAppGUI(Socket s, InputStream i,
-                      DataOutputStream o) {
+    public ChatWindow(Socket s, InputStream i,
+                      DataOutputStream o, String fr, String t) {
         socket = s;
         input  = i;
         output = o;
+        from   = fr;
+        to     = t;
 
         // Set up the JFrame
         setupJFrame();
@@ -45,7 +52,7 @@ public class ChatAppGUI extends JFrame {
         
     }
     private void setupJFrame() {
-        setTitle("Chat App + user: ");
+        setTitle("chat " + from + " " + to);
         setSize(400, 300);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -86,7 +93,8 @@ public class ChatAppGUI extends JFrame {
     }
 
     void sendMessage() throws IOException {
-        String message = messageField.getText();
+        String message = to  +" " + messageField.getText();
+        System.out.println(message);
         if (!message.isEmpty()) {
             chatArea.append("You: " + message + "\n");
             output.write(message.getBytes());
@@ -115,19 +123,14 @@ public class ChatAppGUI extends JFrame {
 				if (bytesRead == -1) {
 					break; // End of stream, server has disconnected
 				}
-				// Check if the message is a file
+				// pokud je správa od týpečka pro kterého má být, tak ji vypiš
 				else {
-					String message = new String(buffer, 0, bytesRead);
-                    String[] tokens  = message.split("\\s+");
-                    if (tokens[0].equals("acc")) { // paralelně spust nové okno
-                        SwingUtilities.invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                new ChatWindow(socket, input, output, tokens[1], tokens[2]);
-                            }
-                        });
+
+					String message = new String(buffer, 0, bytesRead); 
+                    String[] tokens = message.split("\\s+");
+                    if (tokens[0].equals(from)) {
+                        writeMessage(to +": " +message);
                     }
-					writeMessage(message);
 				}
 			}
 		} catch (IOException e) {
