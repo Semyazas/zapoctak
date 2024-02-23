@@ -28,18 +28,7 @@ public class LoginRegistrationGUI extends JFrame {
     public LoginRegistrationGUI(Socket s, InputStream i,
                       DataOutputStream o) {
 
-        socket = s; 
-        input = i;                        
-        output = o;
-        
-        setTitle("Login");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(300, 150);
-        setLocationRelativeTo(null);
-
-        // Create components
-        JLabel usernameLabel = new JLabel("Username:");
-        JLabel passwordLabel = new JLabel("Password:");
+        init_GUI(s, i, o);
 
         usernameField = new JTextField(20);
         passwordField = new JPasswordField(20);
@@ -48,17 +37,49 @@ public class LoginRegistrationGUI extends JFrame {
         JButton registerButton = new JButton("Register");
 
         // Create panels
+        create_panels(loginButton, registerButton);
+
+        init_login_button_listener(loginButton);
+
+        init_register_button_listener(registerButton);
+
+        setVisible(true);
+    }
+
+    private void init_GUI(Socket s, InputStream i,
+                    DataOutputStream o) {
+        socket = s; 
+        input = i;                        
+        output = o;
+        
+        setTitle("Login");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(300, 150);
+        setLocationRelativeTo(null);
+    }
+
+    private void create_panels(JButton loginButton,JButton registerButton) {
+
         JPanel loginPanel = new JPanel(new GridLayout(3, 2));
+        JPanel buttonPanel = new JPanel();
+                    
+        JLabel usernameLabel = new JLabel("Username:");
+        JLabel passwordLabel = new JLabel("Password:");
+        // Create panels
         loginPanel.add(usernameLabel);
         loginPanel.add(usernameField);
         loginPanel.add(passwordLabel);
         loginPanel.add(passwordField);
 
-        JPanel buttonPanel = new JPanel();
         buttonPanel.add(loginButton);
         buttonPanel.add(registerButton);
 
-        // Add action listeners
+        setLayout(new BorderLayout());
+        add(loginPanel, BorderLayout.CENTER);
+        add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    private void init_login_button_listener(JButton loginButton) {
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -74,13 +95,14 @@ public class LoginRegistrationGUI extends JFrame {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
                 }
-                // Add your login logic here
                 JOptionPane.showMessageDialog(LoginRegistrationGUI.this, "Login button clicked");
                 logged = true;
                 dispose();
             }
         });
-
+    }
+    
+    private void init_register_button_listener(JButton registerButton) {
         registerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -89,14 +111,6 @@ public class LoginRegistrationGUI extends JFrame {
                 dispose();
             }
         });
-
-        // Set layout for the main frame
-        setLayout(new BorderLayout());
-        add(loginPanel, BorderLayout.CENTER);
-        add(buttonPanel, BorderLayout.SOUTH);
-
-        // Make the frame visible
-        setVisible(true);
     }
 
     private void openRegistrationWindow() {
@@ -128,6 +142,19 @@ public class LoginRegistrationGUI extends JFrame {
         registrationButtonPanel.add(registerButton);
 
         // Add action listener for registration button
+        register_button_logic(registerButton, nameField, surnameField, registrationFrame);
+
+        // Set layout for the registration frame
+        registrationFrame.setLayout(new BorderLayout());
+        registrationFrame.add(registrationPanel, BorderLayout.CENTER);
+        registrationFrame.add(registrationButtonPanel, BorderLayout.SOUTH);
+
+        // Make the registration frame visible
+        registrationFrame.setVisible(true);
+    }
+
+    private void register_button_logic(JButton registerButton, JTextField nameField, 
+                                        JTextField surnameField, JFrame registrationFrame) {
         registerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -141,24 +168,12 @@ public class LoginRegistrationGUI extends JFrame {
                     output.write((username + " " +pswd +" " + name + " " + surname).getBytes());
                     output.flush();
                 } catch (IOException e1) {
-                    // TODO Auto-generated catch block
                     e1.printStackTrace();
                 }
-                // Add your registration logic here
                 JOptionPane.showMessageDialog(registrationFrame, "Registration button clicked");
                 logged = true;
                 registrationFrame.dispose();
             }
         });
-
-        // Set layout for the registration frame
-        registrationFrame.setLayout(new BorderLayout());
-        registrationFrame.add(registrationPanel, BorderLayout.CENTER);
-        registrationFrame.add(registrationButtonPanel, BorderLayout.SOUTH);
-
-        // Make the registration frame visible
-        registrationFrame.setVisible(true);
-
-        // TODO: vyčisti pro tendle file .. je to mess
-    }
+    } // TODO: dovyčisti tendle file
 }

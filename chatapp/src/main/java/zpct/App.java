@@ -18,7 +18,6 @@ public class App {
 	static InputStream input;
 	static DataOutputStream output;
     public static void main( String[] args ) {
-        
         try {
 			socket = new Socket("localhost", 12345);
             

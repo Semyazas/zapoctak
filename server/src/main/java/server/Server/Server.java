@@ -150,7 +150,7 @@ public class Server {
             } 
             else {
                 target_client_username = tokens[0];
-                mess_string = userName + " "; 
+                mess_string =""; // tady jsem to možná rozbil, tak se kdyžtak koukni do gitu 
             
                 // we will re-build message
                 for (int i = 1; i < tokens.length; i ++) {
