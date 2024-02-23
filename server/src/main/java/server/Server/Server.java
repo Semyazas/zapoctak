@@ -66,7 +66,7 @@ public class Server {
             this.clientSocket = socket;
             registration_handler = new registrator("C:\\Users\\marti\\OneDrive\\Plocha\\bin_tree.java\\zapoctak\\server\\data\\data.txt");
             chatters = ch;
-            input = new DataInputStream(clientSocket.getInputStream());
+            input  = new DataInputStream(clientSocket.getInputStream());
             output = new DataOutputStream(clientSocket.getOutputStream());
         } 
         public Socket getSocket() {
@@ -74,7 +74,6 @@ public class Server {
         }
 
         public void run()    { 
-
             try {      
                   // get the outputstream of client 
                 System.out.println("Client connected: " + clientSocket);
@@ -100,7 +99,7 @@ public class Server {
                     String[] tokens = message.split("\\s+");
                     userName = tokens[0];
                     passWord = tokens[1];
-                    chatters.put(userName, this);
+                    chatters.put(userName, this); // todle by mělo být asi v loginu
                     registration_handler.log_user(tokens, userName,passWord,output);
                 } else {
                     int podm = handle_chatWindow_request(message);
@@ -118,9 +117,17 @@ public class Server {
         public int handle_chatWindow_request(String message) throws IOException { 
             String[] tokens = message.split("\\s+");
             if (tokens[0].equals("req")) {
-                if ( chatters.containsKey(tokens[1])) {
-                    output.write(("acc " + userName + " " + tokens[1]).getBytes());
-                    output.flush();
+                if (chatters.containsKey(tokens[1])) {
+                    ClientHandler c = chatters.get(tokens[1]);
+
+                    Socket socket = c.getSocket();
+                    // Sending the response back to the client.
+                    // Note: Ideally you want all these in a try/catch/finally block
+                    OutputStream os = socket.getOutputStream();
+                    DataOutputStream osw = new DataOutputStream(os);
+                    osw.write((userName + " " + message).getBytes());
+                    osw.flush();
+
                     return MSG_REQUEST_CORRECT;
                 } else {
                     return MSG_REQUEST_INCORRECT;
@@ -131,23 +138,36 @@ public class Server {
 
         public void handle_sending_messages(String message) throws IOException {
             String[] tokens = message.split("\\s+");
-            String targer_client_username = tokens[0];
-            String mess_string = userName + " "; 
+            String target_client_username = "";
+            String mess_string;
+
+            if (tokens.length >1 && tokens[0].equals("acc")) {
+                System.out.println("acc funguje ");
+                target_client_username = tokens[1];
+                mess_string =" acc " + tokens[1];
+                output.write((userName + " uacc " + tokens[1]).getBytes());
+                output.flush();
+            } 
+            else {
+                target_client_username = tokens[0];
+                mess_string = userName + " "; 
             
-            // we will re-build message
-            for (int i = 1; i < tokens.length; i ++) {
-                mess_string+= tokens[i] + " ";
+                // we will re-build message
+                for (int i = 1; i < tokens.length; i ++) {
+                    mess_string+= tokens[i] + " ";
+                }
             }
 
-            ClientHandler c = chatters.get(targer_client_username);
+            ClientHandler c = chatters.get(target_client_username);
 
             Socket socket = c.getSocket();
             // Sending the response back to the client.
             // Note: Ideally you want all these in a try/catch/finally block
             OutputStream os = socket.getOutputStream();
             DataOutputStream osw = new DataOutputStream(os);
-            osw.write(mess_string.getBytes());
+            osw.write((userName + " " + mess_string).getBytes());
             osw.flush();
+            
         }
     } 
 }

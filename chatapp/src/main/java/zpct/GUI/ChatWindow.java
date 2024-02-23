@@ -43,12 +43,8 @@ public class ChatWindow extends JFrame {
         setVisible(true);
          
 	    // Create a thread to handle messages from the server
-        Thread serverThread = new Thread(() -> {
-				handle_recieving_messages();
-        });
-        serverThread.start(); // Start the server thread
-
-            // Allow the client to send messages and files to the server
+   
+        // Allow the client to send messages and files to the server
         
     }
     private void setupJFrame() {
@@ -93,7 +89,7 @@ public class ChatWindow extends JFrame {
     }
 
     void sendMessage() throws IOException {
-        String message = to  +" " + messageField.getText();
+        String message = to + " " + messageField.getText();
         System.out.println(message);
         if (!message.isEmpty()) {
             chatArea.append("You: " + message + "\n");
@@ -114,27 +110,6 @@ public class ChatWindow extends JFrame {
         }
     }
 
-    public void handle_recieving_messages() {
-		try {
-			while (true) {
-				// Read messages from the server
-				byte[] buffer = new byte[1024];
-				int bytesRead = input.read(buffer);
-				if (bytesRead == -1) {
-					break; // End of stream, server has disconnected
-				}
-				// pokud je správa od týpečka pro kterého má být, tak ji vypiš
-				else {
-
-					String message = new String(buffer, 0, bytesRead); 
-                    String[] tokens = message.split("\\s+");
-                    if (tokens[0].equals(from)) {
-                        writeMessage(to +": " +message);
-                    }
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    // idea .. jeden bude prostě číst a další bude psát !
+    // TODO: implement this briliant idea
 }
