@@ -22,25 +22,16 @@ public class Server {
             server = new ServerSocket(12345); 
             server.setReuseAddress(true); 
   
-            // running infinite loop for getting 
-            // client request 
             System.out.println("listening ...");
-
             // Create a thread to handle messages from the client
             while (true) {  // todle se bude pořád točit ... získá od clienta socket
-  
                 Socket client = server.accept(); 
-  
-                System.out.println("New client connected"
-                                   + client.getInetAddress() 
-                                         .getHostAddress()); 
-  
-                ClientHandler clientSock 
-                    = new ClientHandler(client,username_clientHandler); 
 
+                System.out.println("New client connected" + client.getInetAddress().getHostAddress()); 
+
+                ClientHandler clientSock = new ClientHandler(client,username_clientHandler); 
                 new Thread(clientSock).start(); 
             }  
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -96,11 +87,7 @@ public class Server {
                 System.out.println("Client: " + message);
 
                 if (!registration_handler.logged) { // At first I expect correct output
-                    String[] tokens = message.split("\\s+");
-                    userName = tokens[0];
-                    passWord = tokens[1];
-                    chatters.put(userName, this); // todle by mělo být asi v loginu
-                    registration_handler.log_user(tokens, userName,passWord,output);
+                    handle_log_or_registration(message, registration_handler);
                 } else {
                     int podm = handle_chatWindow_request(message);
                     if (podm==MSG) {
@@ -122,7 +109,6 @@ public class Server {
 
                     Socket socket = c.getSocket();
                     // Sending the response back to the client.
-                    // Note: Ideally you want all these in a try/catch/finally block
                     OutputStream os = socket.getOutputStream();
                     DataOutputStream osw = new DataOutputStream(os);
                     osw.write((userName + " " + message).getBytes());
@@ -139,25 +125,31 @@ public class Server {
         public void handle_sending_messages(String message) throws IOException {
             String[] tokens = message.split("\\s+");
             String target_client_username = "";
-            String mess_string;
+            String mess_string = "";
 
             if (tokens.length >1 && tokens[0].equals("acc")) {
-                System.out.println("acc funguje ");
-                target_client_username = tokens[1];
-                mess_string =" acc " + tokens[1];
-                output.write((userName + " uacc " + tokens[1]).getBytes());
-                output.flush();
+                accept_request(tokens, target_client_username, mess_string);
             } 
             else {
                 target_client_username = tokens[0];
                 mess_string =""; // tady jsem to možná rozbil, tak se kdyžtak koukni do gitu 
             
-                // we will re-build message
                 for (int i = 1; i < tokens.length; i ++) {
                     mess_string+= tokens[i] + " ";
                 }
             }
+            send_message(target_client_username, mess_string);            
+        }
+        public void accept_request(String[] tokens,String target_client_username,
+                                 String mess_string) throws IOException {
+            System.out.println("acc funguje ");
+            target_client_username = tokens[1];
+            mess_string =" acc " + tokens[1];
+            output.write((userName + " uacc " + tokens[1]).getBytes());
+            output.flush();
+        }
 
+        public void send_message(String target_client_username, String mess_string) throws IOException {
             ClientHandler c = chatters.get(target_client_username);
 
             Socket socket = c.getSocket();
@@ -167,7 +159,14 @@ public class Server {
             DataOutputStream osw = new DataOutputStream(os);
             osw.write((userName + " " + mess_string).getBytes());
             osw.flush();
-            
+        }
+
+        public void handle_log_or_registration(String message, registrator registration_handler) throws IOException {
+            String[] tokens = message.split("\\s+");
+            userName = tokens[0];
+            passWord = tokens[1];
+            chatters.put(userName, this); // todle by mělo být asi v loginu
+            registration_handler.log_user(tokens, userName,passWord,output);
         }
     } 
 }

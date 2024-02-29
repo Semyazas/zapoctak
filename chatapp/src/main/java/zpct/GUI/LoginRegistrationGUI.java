@@ -10,15 +10,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+
 
 public class LoginRegistrationGUI extends JFrame {
 
     private JTextField usernameField;
+    private JTextField nameField;
     private JPasswordField passwordField;
+    JTextField surnameField;
+    JButton registerButton;
+
     public boolean logged = false;
 
     Socket socket; 
@@ -121,28 +122,18 @@ public class LoginRegistrationGUI extends JFrame {
         registrationFrame.setLocationRelativeTo(null);
 
         // Create components for registration window
-        JTextField usernameField = new JTextField(20);
-        JPasswordField passwordField = new JPasswordField(20);
-        JTextField nameField = new JTextField(20);
-        JTextField surnameField = new JTextField(20);
-        JButton registerButton = new JButton("Register");
+        create_components_for_registration_window();
 
         // Create panels for registration window
         JPanel registrationPanel = new JPanel(new GridLayout(4, 2));
-        registrationPanel.add(new JLabel("Username:"));
-        registrationPanel.add(usernameField);
-        registrationPanel.add(new JLabel("Password:"));
-        registrationPanel.add(passwordField);
-        registrationPanel.add(new JLabel("Name:"));
-        registrationPanel.add(nameField);
-        registrationPanel.add(new JLabel("Surname:"));
-        registrationPanel.add(surnameField);
+        setup_registration_panel(registrationPanel, nameField, surnameField);
 
         JPanel registrationButtonPanel = new JPanel();
         registrationButtonPanel.add(registerButton);
 
         // Add action listener for registration button
-        register_button_logic(registerButton, nameField, surnameField, registrationFrame);
+        register_button_logic(registerButton, nameField, 
+                                surnameField, registrationFrame);
 
         // Set layout for the registration frame
         registrationFrame.setLayout(new BorderLayout());
@@ -151,6 +142,26 @@ public class LoginRegistrationGUI extends JFrame {
 
         // Make the registration frame visible
         registrationFrame.setVisible(true);
+    }
+
+    private void setup_registration_panel(JPanel registrationPanel, JTextField nameField, JTextField surnameField) {
+        registrationPanel.add(new JLabel("Username:"));
+        registrationPanel.add(usernameField);
+        registrationPanel.add(new JLabel("Password:"));
+        registrationPanel.add(passwordField);
+        registrationPanel.add(new JLabel("Name:"));
+        registrationPanel.add(nameField);
+        registrationPanel.add(new JLabel("Surname:"));
+        registrationPanel.add(surnameField);
+    }
+
+    private void create_components_for_registration_window() {
+        usernameField = new JTextField(20);
+        passwordField = new JPasswordField(20);
+        nameField = new JTextField(20);
+        surnameField = new JTextField(20);
+        registerButton = new JButton("Register");
+
     }
 
     private void register_button_logic(JButton registerButton, JTextField nameField, 
