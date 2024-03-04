@@ -40,7 +40,7 @@ public class ChatWindow extends ChatAppGUI {
 
     @Override 
     protected void setupJFrame() {
-        setTitle("Chat with:" + to );
+        setTitle("Chat with: " + to );
         setSize(400, 300);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -48,11 +48,11 @@ public class ChatWindow extends ChatAppGUI {
     
     @Override
     void sendMessage() throws IOException {
-        String message = to + " " + messageField.getText();
+        String message = messageField.getText();
         System.out.println(message);
         if (!message.isEmpty()) {
             chatArea.append("You: " + message + "\n");
-            output.write(message.getBytes());
+            output.write((to + " " + message).getBytes());
 			output.flush();
             // Include logic here to send the message to the other user or chat server
             // For simplicity, just displaying the sent message in the chatArea

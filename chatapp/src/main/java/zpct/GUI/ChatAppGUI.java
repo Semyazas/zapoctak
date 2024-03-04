@@ -168,15 +168,17 @@ public class ChatAppGUI extends JFrame {
     protected void handle_requests(String message, String[] tokens) {
         System.out.println(message);
         if (tokens.length >1) {
-
             if (tokens[1].equals("acc") && requested.contains(tokens[0])) { // paralelně spust nové okno
                 new_user_to_user_window(tokens[2], tokens[0]);
-            }
-            else if (tokens[1].equals("req")) {
+            
+            } else if (tokens[1].equals("req")) {
                 System.out.println(tokens[0] + " mě chce");
                 this_was_requested.add(tokens[0]);
-            } 
-            else if (tokens[1].equals("uacc") && this_was_requested.contains(tokens[2])) {
+            
+            } else if (tokens[1].equals("uacc") && this_was_requested.contains(tokens[2])) {
+                new_user_to_user_window(tokens[0], tokens[2]);
+            
+            } else if (tokens[1].equals("wacc")) {
                 new_user_to_user_window(tokens[0], tokens[2]);
             }
         }
@@ -187,7 +189,7 @@ public class ChatAppGUI extends JFrame {
         String[] tokens  = message.split("\\s+");
 
         handle_requests(message,tokens);
-        writeMessage(message);          // writes message to terminal window
+        writeMessage(message);              // writes message to terminal window
         write_to_windows(message, tokens); // writes message to apropriate chat window
     }
 }

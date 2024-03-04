@@ -3,9 +3,13 @@ package server.Server;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Scanner;
+
+import org.omg.CORBA.TIMEOUT;
+
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import server.Server.history.history;
 
 public class Server {
 
@@ -14,9 +18,13 @@ public class Server {
     static DataOutputStream output;
     HashMap<String,ClientHandler> username_clientHandler;
 
-    public Server() throws IOException {
-        this.input = null;
+    List<String> unread_messages;
+
+    public Server() throws IOException, InterruptedException {
+        input = null;
         username_clientHandler = new HashMap<>();
+        unread_messages =   Collections.synchronizedList(new ArrayList<>());
+
         try {
             // server is listening on port 1234 
             server = new ServerSocket(12345); 
@@ -29,7 +37,7 @@ public class Server {
 
                 System.out.println("New client connected" + client.getInetAddress().getHostAddress()); 
 
-                ClientHandler clientSock = new ClientHandler(client,username_clientHandler); 
+                ClientHandler clientSock = new ClientHandler(client,username_clientHandler,unread_messages); 
                 new Thread(clientSock).start(); 
             }  
         } catch (IOException e) {
@@ -43,6 +51,7 @@ public class Server {
         String passWord;
         registrator registration_handler;
         HashMap<String,ClientHandler> chatters;
+        List<String> unread_messages;
 
         private final DataOutputStream output;
         private final DataInputStream input;
@@ -53,12 +62,14 @@ public class Server {
         private final int MSG                   = 2;
   
         // Constructor 
-        ClientHandler(Socket socket, HashMap<String,ClientHandler> ch) throws IOException { 
+        ClientHandler(Socket socket, HashMap<String,ClientHandler> ch, List<String> unread_messages) throws IOException, InterruptedException { 
             this.clientSocket = socket;
             registration_handler = new registrator("C:\\Users\\marti\\OneDrive\\Plocha\\bin_tree.java\\zapoctak\\server\\data\\data.txt");
             chatters = ch;
             input  = new DataInputStream(clientSocket.getInputStream());
             output = new DataOutputStream(clientSocket.getOutputStream());
+            this.unread_messages = unread_messages;
+            handle_unread_messages();
         } 
         public Socket getSocket() {
             return clientSocket;
@@ -68,14 +79,19 @@ public class Server {
             try {      
                   // get the outputstream of client 
                 System.out.println("Client connected: " + clientSocket);
-                handle_recieving_messages(input,output);
+                try {
+                    handle_recieving_messages(input,output);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             } catch (IOException e) {
                 chatters.remove(userName);
                 System.out.println("Connection lost");
                 return;
             }
         }
-        public void handle_recieving_messages(DataInputStream input,DataOutputStream output) throws IOException {
+        public void handle_recieving_messages(DataInputStream input,DataOutputStream output) throws IOException, InterruptedException {
             while (true) {
                     // Read messages from the client
                 byte[] buffer = new byte[1024];
@@ -122,40 +138,85 @@ public class Server {
             return MSG;
         }   
 
-        public void handle_sending_messages(String message) throws IOException {
+        public void handle_sending_messages(String message) throws IOException, InterruptedException {
             String[] tokens = message.split("\\s+");
-            String target_client_username = "";
+            String target_client_username = tokens[1];
             String mess_string = "";
 
             if (tokens.length >1 && tokens[0].equals("acc")) {
-                accept_request(tokens, target_client_username, mess_string);
+                accept_request(tokens,true);
+
+            }  else if (tokens.length >1 && tokens[0].equals("hist")) { // historie je ve formátu "hist target"
+                history.get_user_to_user_history(userName, target_client_username, output);
             } 
-            else {
+            else if (tokens.length >1 && tokens[0].equals("window")) {
+                if (history.can_open_window(userName, target_client_username)) {
+                    accept_request(tokens, false);
+                }
+
+            } else {
                 target_client_username = tokens[0];
-                mess_string =""; // tady jsem to možná rozbil, tak se kdyžtak koukni do gitu 
+                mess_string ="";     // tady jsem to možná rozbil, tak se kdyžtak koukni do gitu 
             
                 for (int i = 1; i < tokens.length; i ++) {
                     mess_string+= tokens[i] + " ";
                 }
+                send_message(target_client_username, mess_string); 
+                history.write_history(userName, target_client_username, mess_string); 
             }
-            send_message(target_client_username, mess_string);            
         }
-        public void accept_request(String[] tokens,String target_client_username,
-                                 String mess_string) throws IOException {
+
+        public void accept_request(String[] tokens,
+                                    boolean first_time_chatting_between_2_users) throws IOException {
+            String mess_string = "";
             System.out.println("acc funguje ");
-            target_client_username = tokens[1];
-            mess_string =" acc " + tokens[1];
-            output.write((userName + " uacc " + tokens[1]).getBytes());
+            String target_client_username = tokens[1]; 
+
+            if (first_time_chatting_between_2_users) {
+                mess_string =" acc " + target_client_username;
+
+            } else {
+                mess_string=" wacc " + target_client_username;
+                target_client_username = userName;
+            }
+            send_message(target_client_username, mess_string);
+
+            output.write((userName + " uacc " + target_client_username).getBytes());
             output.flush();
+
+        }
+
+        public void handle_unread_messages() throws IOException, InterruptedException {
+            String[] tokens;
+            boolean open = false;
+            for (String message : unread_messages) {
+                tokens = message.split(";");
+                if (tokens[0].equals(userName)) { // chces formát odkoho - komu - cas - message
+                    if (open) {
+                        output.write((userName + " wacc " + tokens[0]).getBytes());
+                        output.flush();  
+                    }
+
+                    TimeUnit.MILLISECONDS.sleep(5);
+
+                    output.write((tokens[1]).getBytes());
+                    output.flush();
+                }
+            }
         }
 
         public void send_message(String target_client_username, String mess_string) throws IOException {
-            ClientHandler c = chatters.get(target_client_username);
-
-            Socket socket = c.getSocket();
+            ClientHandler target_client = chatters.get(target_client_username);
+            System.out.println(target_client);
+            if (target_client == null) {
+                System.out.println(target_client_username + " is offline");
+                unread_messages.add(userName + " " + mess_string);
+                return;
+            }
+            Socket target_socket = target_client.getSocket();
             // Sending the response back to the client.
             // Note: Ideally you want all these in a try/catch/finally block
-            OutputStream os = socket.getOutputStream();
+            OutputStream os = target_socket.getOutputStream();
             DataOutputStream osw = new DataOutputStream(os);
             osw.write((userName + " " + mess_string).getBytes());
             osw.flush();

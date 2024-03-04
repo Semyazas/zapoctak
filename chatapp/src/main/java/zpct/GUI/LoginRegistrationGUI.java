@@ -121,7 +121,6 @@ public class LoginRegistrationGUI extends JFrame {
         registrationFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         registrationFrame.setLocationRelativeTo(null);
 
-        // Create components for registration window
         create_components_for_registration_window();
 
         // Create panels for registration window
@@ -131,9 +130,7 @@ public class LoginRegistrationGUI extends JFrame {
         JPanel registrationButtonPanel = new JPanel();
         registrationButtonPanel.add(registerButton);
 
-        // Add action listener for registration button
-        register_button_logic(registerButton, nameField, 
-                                surnameField, registrationFrame);
+        register_button_logic(registerButton, nameField, surnameField, registrationFrame);
 
         // Set layout for the registration frame
         registrationFrame.setLayout(new BorderLayout());

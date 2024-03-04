@@ -80,6 +80,7 @@ public class registrator {
             output.flush();
         } 
         else if (tokens.length == 2) {
+            
             if (correct_password(tokens)) {
                 logged = true;
                 System.out.println("Client: " + userName + " logged in succesfully");
