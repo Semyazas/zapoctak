@@ -3,6 +3,7 @@ package server.Server;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
 
 import org.omg.CORBA.TIMEOUT;
 
@@ -69,7 +70,7 @@ public class Server {
             input  = new DataInputStream(clientSocket.getInputStream());
             output = new DataOutputStream(clientSocket.getOutputStream());
             this.unread_messages = unread_messages;
-            handle_unread_messages();
+            System.out.println(unread_messages);
         } 
         public Socket getSocket() {
             return clientSocket;
@@ -104,6 +105,7 @@ public class Server {
 
                 if (!registration_handler.logged) { // At first I expect correct output
                     handle_log_or_registration(message, registration_handler);
+                    handle_unread_messages();
                 } else {
                     int podm = handle_chatWindow_request(message);
                     if (podm==MSG) {
@@ -191,15 +193,17 @@ public class Server {
             boolean open = false;
             for (String message : unread_messages) {
                 tokens = message.split(";");
-                if (tokens[0].equals(userName)) { // chces formát odkoho - komu - cas - message
-                    if (open) {
+                if (tokens[1].equals(userName)) { // chces formát odkoho - komu - cas - message
+                    System.out.println(userName + " dostal zprávu: " + tokens[0] + " " + tokens[2] +" " + tokens[3]);
+                    if (!open) {
                         output.write((userName + " wacc " + tokens[0]).getBytes());
                         output.flush();  
+                        open = true;
                     }
 
-                    TimeUnit.MILLISECONDS.sleep(5);
+                    TimeUnit.MILLISECONDS.sleep(500);
 
-                    output.write((tokens[1]).getBytes());
+                    output.write((tokens[0] + " " + tokens[2] +" " + tokens[3]).getBytes());
                     output.flush();
                 }
             }
@@ -210,7 +214,10 @@ public class Server {
             System.out.println(target_client);
             if (target_client == null) {
                 System.out.println(target_client_username + " is offline");
-                unread_messages.add(userName + " " + mess_string);
+                SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");  
+                Date date = new Date(); 
+                unread_messages.add(userName + ";" + target_client_username + 
+                                     ";" + formatter.format(date) + ";" + mess_string);
                 return;
             }
             Socket target_socket = target_client.getSocket();
