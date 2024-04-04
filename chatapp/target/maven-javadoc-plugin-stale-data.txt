@@ -1,0 +1,58 @@
+@options
+@packages
+-classpath
+'C:/Users/marti/.m2/repository/org/openjfx/javafx-controls/17.0.1/javafx-controls-17.0.1.jar;C:/Users/marti/.m2/repository/org/openjfx/javafx-controls/17.0.1/javafx-controls-17.0.1-win.jar;C:/Users/marti/.m2/repository/org/openjfx/javafx-graphics/17.0.1/javafx-graphics-17.0.1.jar;C:/Users/marti/.m2/repository/org/openjfx/javafx-graphics/17.0.1/javafx-graphics-17.0.1-win.jar;C:/Users/marti/.m2/repository/org/openjfx/javafx-base/17.0.1/javafx-base-17.0.1.jar;C:/Users/marti/.m2/repository/org/openjfx/javafx-base/17.0.1/javafx-base-17.0.1-win.jar'
+-encoding
+'UTF-8'
+-protected
+-source
+'1.8'
+-sourcepath
+'c:/Users/marti/OneDrive/Plocha/bin_tree.java/zapoctak/chatapp/src/main/java'
+-author
+-bottom
+'Copyright &#169; 2024. All rights reserved.'
+-charset
+'UTF-8'
+-d
+'c:/Users/marti/OneDrive/Plocha/bin_tree.java/zapoctak/chatapp/target/site/apidocs'
+-docencoding
+'UTF-8'
+-doctitle
+'chatapp 1.0-SNAPSHOT API'
+-linkoffline
+'https://docs.oracle.com/javase/8/docs/api' 'c:/Users/marti/OneDrive/Plocha/bin_tree.java/zapoctak/chatapp/target/javadoc-bundle-options'
+-use
+-version
+-windowtitle
+'chatapp 1.0-SNAPSHOT API'
+zpct
+zpct.GUI
+C:\Users\marti\.m2\repository\org\openjfx\javafx-controls\17.0.1\javafx-controls-17.0.1.jar = 1712263630444
+C:\Users\marti\.m2\repository\org\openjfx\javafx-controls\17.0.1\javafx-controls-17.0.1-win.jar = 1712263634337
+C:\Users\marti\.m2\repository\org\openjfx\javafx-graphics\17.0.1\javafx-graphics-17.0.1.jar = 1712263630564
+C:\Users\marti\.m2\repository\org\openjfx\javafx-graphics\17.0.1\javafx-graphics-17.0.1-win.jar = 1712263638660
+C:\Users\marti\.m2\repository\org\openjfx\javafx-base\17.0.1\javafx-base-17.0.1.jar = 1712263630526
+C:\Users\marti\.m2\repository\org\openjfx\javafx-base\17.0.1\javafx-base-17.0.1-win.jar = 1712263632414
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\chatapp\src\main\java = 1712233754269
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\chatapp\target\site\apidocs\allclasses-index.html = 1712266185103
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\chatapp\target\site\apidocs\allpackages-index.html = 1712266185107
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\chatapp\target\site\apidocs\copy.svg = 1712266185165
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\chatapp\target\site\apidocs\element-list = 1712266184966
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\chatapp\target\site\apidocs\help-doc.html = 1712266185151
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\chatapp\target\site\apidocs\index-all.html = 1712266185129
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\chatapp\target\site\apidocs\index.html = 1712266185086
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\chatapp\target\site\apidocs\link.svg = 1712266185167
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\chatapp\target\site\apidocs\member-search-index.js = 1712266185115
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\chatapp\target\site\apidocs\module-search-index.js = 1712266185109
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\chatapp\target\site\apidocs\overview-summary.html = 1712266185137
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\chatapp\target\site\apidocs\overview-tree.html = 1712266185080
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\chatapp\target\site\apidocs\package-search-index.js = 1712266185111
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\chatapp\target\site\apidocs\script.js = 1712266185163
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\chatapp\target\site\apidocs\search-page.js = 1712266185173
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\chatapp\target\site\apidocs\search.html = 1712266185133
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\chatapp\target\site\apidocs\search.js = 1712266185171
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\chatapp\target\site\apidocs\serialized-form.html = 1712266185031
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\chatapp\target\site\apidocs\stylesheet.css = 1712266185160
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\chatapp\target\site\apidocs\tag-search-index.js = 1712266185116
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\chatapp\target\site\apidocs\type-search-index.js = 1712266185113
