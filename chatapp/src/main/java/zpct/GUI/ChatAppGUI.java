@@ -15,6 +15,10 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 public class ChatAppGUI extends JFrame {
+
+    private final int COMMAND_INDEX         = 3;
+    private final int MESSAGE_TARGET_INDEX  = 2;
+
     protected JTextArea chatArea;
     protected JTextField messageField;
 
@@ -45,10 +49,11 @@ public class ChatAppGUI extends JFrame {
      * @param i The input stream to receive messages from the server.
      * @param o The output stream to send messages to the server.
      */
-    public ChatAppGUI(Socket s, InputStream i, DataOutputStream o) {
+    public ChatAppGUI(Socket s, InputStream i, DataOutputStream o,String u_name) {
         socket = s;
         input = i;
         output = o;
+        username = u_name;
 
         opened_Windows = new ArrayList<>();
         requested = new ArrayList<>();
@@ -68,7 +73,12 @@ public class ChatAppGUI extends JFrame {
 
         // Create a thread to handle messages from the server
         Thread serverThread = new Thread(() -> {
-            handle_recieving_messages();
+            try {
+                handle_recieving_messages();
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         });
         serverThread.start(); // Start the server thread
     }
@@ -159,17 +169,23 @@ public class ChatAppGUI extends JFrame {
      *
      * @param message The message to be displayed.
      */
-    protected void writeMessage(String message) {
+    protected void writeMessage(String message,boolean window_msg) {
         if (!message.isEmpty()) {
-            chatArea.append("Server: " + message + "\n"); // Display received message in the chat area
+            if (!window_msg) {
+                chatArea.append("Server: " + message + "\n"); // Display received message in the chat area
+            }
+            else {
+                chatArea.append(message + "\n"); // Display received message in the chat area
+            }
             messageField.setText(""); // Clear the message field after displaying the message
         }
     }
 
     /**
      * Handle receiving messages from the server.
+     * @throws InterruptedException 
      */
-    protected void handle_recieving_messages() {
+    protected void handle_recieving_messages() throws InterruptedException {
         try {
             while (true) {
                 // Read messages from the server
@@ -207,13 +223,33 @@ public class ChatAppGUI extends JFrame {
      *
      * @param message The message to be sent.
      * @param tokens  Tokens parsed from the message.
+     * @throws InterruptedException 
      */
-    protected void write_to_windows(String message, String[] tokens) {
+    protected synchronized void write_to_windows(String message, String[] tokens) throws InterruptedException {
+        String remove_dots = "";
         for (ChatWindow window : opened_Windows) {
-            if (window.to.equals(tokens[0])) {
-                window.writeMessage(message); // Write message to the appropriate chat window
+            System.out.println("to: " + window.to);
+            remove_dots = tokens[MESSAGE_TARGET_INDEX].replace(":", "");
+            if (window.to.equals(remove_dots)) {
+                window.writeMessage(message,true); // Write message to the appropriate chat window
+                return;
             }
         }
+        System.out.println(username + " " + tokens[MESSAGE_TARGET_INDEX]);
+        new_user_to_user_window(username, tokens[MESSAGE_TARGET_INDEX]);
+        wait(500); // nešlo by tady zavolat tu samou funkci ?
+
+        for (ChatWindow window : opened_Windows) {
+            System.out.println("to: " + window.to);
+            remove_dots = tokens[MESSAGE_TARGET_INDEX].replace(":", "");
+
+            if (window.to.equals(remove_dots)) {
+                System.out.println("funguju");
+                window.writeMessage(message,true); // Write message to the appropriate chat window
+                return;
+            }
+        }
+        
     }
 
     /**
@@ -224,16 +260,16 @@ public class ChatAppGUI extends JFrame {
      */
     protected void handle_requests(String message, String[] tokens) {
         System.out.println(message);
-        if (tokens.length > 1) {
-            if (tokens[1].equals("acc") && requested.contains(tokens[0])) {
+        if (tokens.length >= COMMAND_INDEX + 1) {
+            if (tokens[COMMAND_INDEX+1].equals("acc") && requested.contains(tokens[0])) {
                 new_user_to_user_window(tokens[2], tokens[0]); // Accept request and open a new chat window
             } else if (tokens[1].equals("req")) {
                 System.out.println(tokens[0] + " mě chce");
                 this_was_requested.add(tokens[0]); // Add the user to the request list
             } else if (tokens[1].equals("uacc") && this_was_requested.contains(tokens[2])) {
                 new_user_to_user_window(tokens[0], tokens[2]); // Accept request and open a new chat window
-            } else if (tokens[1].equals("wacc")) {
-                new_user_to_user_window(tokens[0], tokens[2]); // Accept request and open a new chat window
+            } else if (tokens[COMMAND_INDEX].equals("wacc")) {
+                new_user_to_user_window(tokens[COMMAND_INDEX - 1], tokens[COMMAND_INDEX+1]); // Accept request and open a new chat window
             }
         }
     }
@@ -243,13 +279,31 @@ public class ChatAppGUI extends JFrame {
      *
      * @param buffer    The buffer containing the received message.
      * @param bytesRead The number of bytes read.
+     * @throws InterruptedException 
      */
-    protected void recieve(byte[] buffer, int bytesRead) {
+    protected void recieve(byte[] buffer, int bytesRead) throws InterruptedException {
         String message = new String(buffer, 0, bytesRead);
         String[] tokens = message.split("\\s+");
 
-        handle_requests(message, tokens); // Handle requests from the server
-        writeMessage(message); // Write the received message to the terminal window
-        write_to_windows(message, tokens); // Write the received message to appropriate chat windows
+        System.out.println("todle jsem dostal: " + message);
+        if (is_command(message)) {
+            System.out.println("je command:");
+            handle_requests(message, tokens); // Handle requests from the server
+            writeMessage(message,false); // Write the received message to the terminal window
+        } else {
+            System.out.println("je zprava:");
+
+            write_to_windows(message, tokens); // Write the received message to appropriate chat windows
+        }
     }
+
+    protected boolean is_command(String msg) {
+        String[] splitted_msg = msg.split(" ");
+        System.out.println("command: |"  + splitted_msg[COMMAND_INDEX] + "| " + splitted_msg[COMMAND_INDEX +1]);
+        return (splitted_msg[COMMAND_INDEX].equals("req") || splitted_msg[COMMAND_INDEX].equals("acc") ||
+                splitted_msg[COMMAND_INDEX].equals("uacc") || splitted_msg[COMMAND_INDEX + 1].equals("wacc") ||
+                splitted_msg[COMMAND_INDEX].equals("window")|| splitted_msg[COMMAND_INDEX + 1].equals("req")
+                || splitted_msg[COMMAND_INDEX + 1].equals("acc"));
+    }
+    // TODO: na todle koukni
 }

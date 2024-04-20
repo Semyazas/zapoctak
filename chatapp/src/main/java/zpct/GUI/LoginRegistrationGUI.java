@@ -26,6 +26,7 @@ public class LoginRegistrationGUI extends JFrame {
     Socket socket;
     InputStream input;
     DataOutputStream output;
+    public String username = "";
 
     /**
      * Constructs a LoginRegistrationGUI object with provided socket, input stream, and output stream.
@@ -109,7 +110,7 @@ public class LoginRegistrationGUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Implement login functionality here
-                String username = usernameField.getText();
+                username = usernameField.getText();
                 char[] password = passwordField.getPassword();
                 String pswd = String.valueOf(password);
                 try {
@@ -216,7 +217,8 @@ public class LoginRegistrationGUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Implement registration functionality here
-                String username = usernameField.getText();
+                username = usernameField.getText();
+
                 char[] password = passwordField.getPassword();
                 String pswd = String.valueOf(password);
                 String name = nameField.getText();

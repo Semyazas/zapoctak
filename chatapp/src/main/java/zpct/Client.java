@@ -32,17 +32,19 @@ public class Client {
             input = socket.getInputStream();
             output = new DataOutputStream(socket.getOutputStream());
 
-            logIn();
+            String username = logIn();
 
             // Initialize the GUI on the Event Dispatch Thread
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    new ChatAppGUI(socket, input, output);
+                    new ChatAppGUI(socket, input, output,username);
                 }
             });
+
         } catch (UnknownHostException u) {
             System.out.println(u);
+            
         } catch (IOException i) {
             System.out.println(i);
             System.out.println("server je vypnutý");
@@ -56,7 +58,7 @@ public class Client {
      *
      * @throws IOException if an I/O error occurs while communicating with the server.
      */
-    public static void logIn() throws IOException {
+    public static String logIn() throws IOException {
         while (true) {
             // Read messages from the client
             LoginRegistrationGUI l = new LoginRegistrationGUI(socket, input, output);
@@ -69,8 +71,10 @@ public class Client {
             String message = new String(buffer, 0, bytesRead);
             System.out.println("Client: " + message);
             if (message.equals("LOGIN SUCCESSFULL")) {
-                break;
+                System.out.println("todle je username:" + l.username);
+                return l.username;
             }
         }
+        return "";
     }
 }
