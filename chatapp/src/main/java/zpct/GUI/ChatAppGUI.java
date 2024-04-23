@@ -1,7 +1,3 @@
-/**
- * A GUI application for a simple chat client.
- * Allows users to send and receive messages through a server.
- */
 package zpct.GUI;
 
 import javax.swing.*;
@@ -12,7 +8,13 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+
+/**
+ * ChatAppGUI is used for logic and GUI of terminal for sending clients commands to server.
+ */
 
 public class ChatAppGUI extends JFrame {
 
@@ -26,12 +28,12 @@ public class ChatAppGUI extends JFrame {
     ArrayList<String> this_was_requested;   // List to store users who requested this client
     ArrayList<ChatWindow> opened_Windows;   // List to store opened chat windows
 
-    Socket socket;          // Socket for communication with the server
-    InputStream input;      // Input stream to receive messages from the server
+    Socket socket;              // Socket for communication with the server
+    InputStream input;          // Input stream to receive messages from the server
     DataOutputStream output;    // Output stream to send messages to the server
-    String username;        // Username of the client
+    String username;            // Username of the client
 
-    /**
+   /**
      * Constructs a ChatAppGUI object.
      * Initializes lists and sets up the GUI components.
      */
@@ -48,8 +50,9 @@ public class ChatAppGUI extends JFrame {
      * @param s The socket for communication with the server.
      * @param i The input stream to receive messages from the server.
      * @param o The output stream to send messages to the server.
+     * @param u_name Username of client.
      */
-    public ChatAppGUI(Socket s, InputStream i, DataOutputStream o,String u_name) {
+    public ChatAppGUI(Socket s, InputStream i, DataOutputStream o, String u_name) {
         socket = s;
         input = i;
         output = o;
@@ -63,7 +66,7 @@ public class ChatAppGUI extends JFrame {
     }
 
     /**
-     * Initializes the GUI components, sets up layout, and starts the server thread.
+     * Initializes the GUI components, sets up layout, and starts the receiver thread.
      */
     protected void init_GUI() {
         setupJFrame();
@@ -72,15 +75,14 @@ public class ChatAppGUI extends JFrame {
         setVisible(true); // Display the GUI
 
         // Create a thread to handle messages from the server
-        Thread serverThread = new Thread(() -> {
+        Thread receiver_thread = new Thread(() -> {
             try {
-                handle_recieving_messages();
+                handle_receiving_messages();
             } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+                System.out.println("Server disconnected");
+            } 
         });
-        serverThread.start(); // Start the server thread
+        receiver_thread.start(); // Start the server thread
     }
 
     /**
@@ -153,7 +155,7 @@ public class ChatAppGUI extends JFrame {
         // If the message is a request, add the user to the requested list
         if (tokens[0].equals("req")) {
             requested.add(tokens[1]);
-            System.out.println("requested: " + tokens[1]);
+       //     System.out.println("requested: " + tokens[1]);
         }
 
         if (!message.isEmpty()) {
@@ -168,13 +170,13 @@ public class ChatAppGUI extends JFrame {
      * Write a message to the chat area.
      *
      * @param message The message to be displayed.
+     * @param window_msg True if we are supposed to write to chat windows.
      */
-    protected void writeMessage(String message,boolean window_msg) {
+    protected void writeMessage(String message, boolean window_msg) {
         if (!message.isEmpty()) {
             if (!window_msg) {
                 chatArea.append("Server: " + message + "\n"); // Display received message in the chat area
-            }
-            else {
+            } else {
                 chatArea.append(message + "\n"); // Display received message in the chat area
             }
             messageField.setText(""); // Clear the message field after displaying the message
@@ -183,9 +185,9 @@ public class ChatAppGUI extends JFrame {
 
     /**
      * Handle receiving messages from the server.
-     * @throws InterruptedException 
+     * @throws InterruptedException If server disconnects it will throw InterruptedException
      */
-    protected void handle_recieving_messages() throws InterruptedException {
+    protected void handle_receiving_messages() throws InterruptedException {
         try {
             while (true) {
                 // Read messages from the server
@@ -194,11 +196,12 @@ public class ChatAppGUI extends JFrame {
                 if (bytesRead == -1) {
                     break; // End of stream, server has disconnected
                 } else {
-                    recieve(buffer, bytesRead);
+                    receive(buffer, bytesRead);
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Server disconnected.");
+            System.exit(0);
         }
     }
 
@@ -206,7 +209,7 @@ public class ChatAppGUI extends JFrame {
      * Open a new user-to-user chat window.
      *
      * @param from The sender of the message.
-     * @param to   The receiver of the message.
+     * @param to The receiver of the message.
      */
     protected void new_user_to_user_window(String from, String to) {
         SwingUtilities.invokeLater(new Runnable() {
@@ -222,88 +225,151 @@ public class ChatAppGUI extends JFrame {
      * Write a message to appropriate chat windows.
      *
      * @param message The message to be sent.
-     * @param tokens  Tokens parsed from the message.
-     * @throws InterruptedException 
+     * @param tokens Tokens parsed from the message.
+     * @throws InterruptedException if the thread is interrupted while waiting
      */
     protected synchronized void write_to_windows(String message, String[] tokens) throws InterruptedException {
-        String remove_dots = "";
-        for (ChatWindow window : opened_Windows) {
-            System.out.println("to: " + window.to);
-            remove_dots = tokens[MESSAGE_TARGET_INDEX].replace(":", "");
-            if (window.to.equals(remove_dots)) {
-                window.writeMessage(message,true); // Write message to the appropriate chat window
-                return;
-            }
+        if (isValidFormat(tokens[0])) {
+            message = hist_string_to_msg(tokens, MESSAGE_TARGET_INDEX ,0);
+            write_to_windows_inner(tokens, message, MESSAGE_TARGET_INDEX);
         }
-        System.out.println(username + " " + tokens[MESSAGE_TARGET_INDEX]);
-        new_user_to_user_window(username, tokens[MESSAGE_TARGET_INDEX]);
-        wait(500); // nešlo by tady zavolat tu samou funkci ?
-
-        for (ChatWindow window : opened_Windows) {
-            System.out.println("to: " + window.to);
-            remove_dots = tokens[MESSAGE_TARGET_INDEX].replace(":", "");
-
-            if (window.to.equals(remove_dots)) {
-                System.out.println("funguju");
-                window.writeMessage(message,true); // Write message to the appropriate chat window
-                return;
-            }
-        }
-        
-    }
-
-    /**
-     * Handle incoming requests from the server.
-     *
-     * @param message The message received from the server.
-     * @param tokens  Tokens parsed from the message.
-     */
-    protected void handle_requests(String message, String[] tokens) {
-        System.out.println(message);
-        if (tokens.length >= COMMAND_INDEX + 1) {
-            if (tokens[COMMAND_INDEX+1].equals("acc") && requested.contains(tokens[0])) {
-                new_user_to_user_window(tokens[2], tokens[0]); // Accept request and open a new chat window
-            } else if (tokens[1].equals("req")) {
-                System.out.println(tokens[0] + " mě chce");
-                this_was_requested.add(tokens[0]); // Add the user to the request list
-            } else if (tokens[1].equals("uacc") && this_was_requested.contains(tokens[2])) {
-                new_user_to_user_window(tokens[0], tokens[2]); // Accept request and open a new chat window
-            } else if (tokens[COMMAND_INDEX].equals("wacc")) {
-                new_user_to_user_window(tokens[COMMAND_INDEX - 1], tokens[COMMAND_INDEX+1]); // Accept request and open a new chat window
-            }
+        else {
+            message = hist_string_to_msg(tokens, MESSAGE_TARGET_INDEX + 1, 1);
+            write_to_windows_inner(tokens, message, 0);
         }
     }
 
     /**
      * Receive a message from the server and handle it.
      *
-     * @param buffer    The buffer containing the received message.
+     * @param buffer The buffer containing the received message.
      * @param bytesRead The number of bytes read.
-     * @throws InterruptedException 
+     * @throws InterruptedException This is needed because of waiting.
      */
-    protected void recieve(byte[] buffer, int bytesRead) throws InterruptedException {
+    protected void receive(byte[] buffer, int bytesRead) throws InterruptedException {
         String message = new String(buffer, 0, bytesRead);
         String[] tokens = message.split("\\s+");
 
-        System.out.println("todle jsem dostal: " + message);
-        if (is_command(message)) {
-            System.out.println("je command:");
+     //   System.out.println("todle jsem dostal: " + message);
+        if (is_command(message) || is_server_message(message)) {
+       //     System.out.println("je command:");
             handle_requests(message, tokens); // Handle requests from the server
-            writeMessage(message,false); // Write the received message to the terminal window
+            writeMessage(message, false); // Write the received message to the terminal window
         } else {
-            System.out.println("je zprava:");
-
+       //     System.out.println("je zprava:");
             write_to_windows(message, tokens); // Write the received message to appropriate chat windows
         }
     }
 
+    /**
+     * Checks if the given message is a server message.
+     *
+     * @param msg the message to be checked
+     * @return {@code true} if the message is a server message, {@code false} otherwise
+     */
+    protected boolean is_server_message(String msg) {
+        return (msg.equals("User you are trying to reach does not exist") ||
+                msg.equals("You and user are already friends :)") ||
+                msg.equals("Incorrect message/command format") ||
+                msg.equals("Incorrect usage of acc"));
+    }
+
+    /**
+     * Checks if the given message is a command.
+     *
+     * @param msg the message to be checked
+     * @return {@code true} if the message is a command, {@code false} otherwise
+     */
     protected boolean is_command(String msg) {
         String[] splitted_msg = msg.split(" ");
-        System.out.println("command: |"  + splitted_msg[COMMAND_INDEX] + "| " + splitted_msg[COMMAND_INDEX +1]);
-        return (splitted_msg[COMMAND_INDEX].equals("req") || splitted_msg[COMMAND_INDEX].equals("acc") ||
-                splitted_msg[COMMAND_INDEX].equals("uacc") || splitted_msg[COMMAND_INDEX + 1].equals("wacc") ||
-                splitted_msg[COMMAND_INDEX].equals("window")|| splitted_msg[COMMAND_INDEX + 1].equals("req")
-                || splitted_msg[COMMAND_INDEX + 1].equals("acc"));
+        if (splitted_msg.length < COMMAND_INDEX + 1) {
+            return false;
+        } else if (splitted_msg[COMMAND_INDEX].equals("req") || splitted_msg[COMMAND_INDEX].equals("window")) {
+            return true;
+        } else if (splitted_msg.length < COMMAND_INDEX + 2) {
+            return false;
+        }
+        return (splitted_msg[COMMAND_INDEX + 1].equals("acc") ||
+                splitted_msg[COMMAND_INDEX + 1].equals("wacc") ||
+                splitted_msg[COMMAND_INDEX + 1].equals("req"));
     }
-    // TODO: na todle koukni
+
+    /**
+     * Writes a message to the appropriate chat window based on the target user.
+     *
+     * @param tokens the tokens containing information about the message
+     * @param message the message to be written
+     * @param MESSAGE_TARGET_INDEX the index of the target user in the tokens array
+     * @throws InterruptedException if the thread is interrupted while waiting
+     */
+    public synchronized void write_to_windows_inner(String[] tokens, String message, int MESSAGE_TARGET_INDEX) throws InterruptedException {
+        for (ChatWindow window : opened_Windows) {
+     //       System.out.println("to: " + window.to);
+            if (window.to.equals(tokens[MESSAGE_TARGET_INDEX])) {
+                window.writeMessage(message, true); // Write message to the appropriate chat window
+                return;
+            }
+        }
+   //     System.out.println(username + " " + tokens[MESSAGE_TARGET_INDEX]);
+        new_user_to_user_window(username, tokens[MESSAGE_TARGET_INDEX]);
+        wait(500); // nešlo by tady zavolat tu samou funkci ?
+        write_to_windows_inner(tokens, message, MESSAGE_TARGET_INDEX);
+    }
+
+    /**
+     * Converts a string array representing a message that was sent after "hist" command by server to a formatted message string.
+     *
+     * @param tokens the tokens representing the historical message
+     * @param msg_index the index of the message content in the tokens array
+     * @param start the starting index for processing tokens
+     * @return the formatted message string
+     */
+    public String hist_string_to_msg(String[] tokens, int msg_index, int start) {
+        String res = "";
+        for (int i = start; i < tokens.length; i++) {
+            if (i == msg_index) {
+                res += tokens[i] + ": ";
+            } else {
+                res += tokens[i] + " ";
+            }
+        }
+        return res;
+    }
+
+    /**
+     * Checks if the given string value is in the format "dd/MM/yyyy".
+     *
+     * @param value the string value to be checked
+     * @return {@code true} if the value is in the correct date format, {@code false} otherwise
+     */
+    public static boolean isValidFormat(String value) {
+        java.util.Date date = null;
+        try {
+      //      System.out.println(value);
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            date = sdf.parse(value);
+            if (!value.equals(sdf.format(date))) {
+                date = null;
+            }
+        } catch (ParseException ex) {
+
+        }
+        return date != null;
+    }
+
+    /**
+     * Handle incoming requests from the server.
+     *
+     * @param message The message received from the server.
+     * @param tokens Tokens parsed from the message.
+     */
+    protected void handle_requests(String message, String[] tokens) {
+     //   System.out.println(message);
+        if (tokens.length >= COMMAND_INDEX + 1) {
+            // Accept request and open a new chat window
+            if (tokens[COMMAND_INDEX].equals("wacc")) {
+                new_user_to_user_window(tokens[COMMAND_INDEX - 1], tokens[COMMAND_INDEX + 1]); // Accept request and open a new chat window
+            }
+        }
+    }
 }

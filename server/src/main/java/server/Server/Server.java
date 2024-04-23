@@ -1,41 +1,68 @@
-
 package server.Server;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import server.Server.history.history;
 
+/**
+ * The Server class provides functionality for communication between server and user,
+ * chatting between users. It also uses functions from history and registrator class for keeping track
+ * of chat history and logging in/registration.
+ */
 public class Server {
 
     ServerSocket server;
     DataInputStream input;
     static DataOutputStream output;
     HashMap<String, ClientHandler> username_clientHandler;
+    static String PATH_FOR_DATA;
 
     List<String> unread_messages;
 
     /**
      * Constructs a Server object and initializes necessary components.
-     *
-     * @throws IOException            If an I/O error occurs when creating the server socket.
+     * @param port                  Port number
+     * @param path_for_data         Path to data.
+     * @throws IOException          If an I/O error occurs when creating the server socket.
      * @throws InterruptedException If the current thread is interrupted while waiting.
      */
-    public Server() throws IOException, InterruptedException {
+    public Server(int port, String path_for_data) throws IOException, InterruptedException {
         input = null;
         username_clientHandler = new HashMap<>();
         unread_messages = Collections.synchronizedList(new ArrayList<>());
+        PATH_FOR_DATA = path_for_data;
 
         try {
-            // Server is listening on port 12345
-            server = new ServerSocket(12345);
+            // Server is listening on the specified port
+            server = new ServerSocket(port);
             server.setReuseAddress(true);
 
             System.out.println("listening ...");
+            Path path_to_HISTORY = Paths.get(PATH_FOR_DATA + "\\history.txt");
+            Path path_to_DATA = Paths.get(PATH_FOR_DATA + "\\data.txt");
+
+            File dir = new File(PATH_FOR_DATA);
+            // Create necessary files if they don't exist
+            if (!Files.exists(path_to_DATA)) {
+           //     System.out.println("Creating new file: " + path_to_DATA);
+                File act = new File(dir, "data.txt");
+                act.createNewFile();
+            }
+            if (!Files.exists(path_to_HISTORY)) {
+                File act2 = new File(dir, "history.txt");
+                act2.createNewFile();
+            }
+            // Initialize history data
+            history.init_Data(path_for_data + "\\history.txt");
+
             // Create a thread to handle messages from the client
             while (true) { // Loop indefinitely to accept client connections
                 Socket client = server.accept();
@@ -81,12 +108,12 @@ public class Server {
          */
         ClientHandler(Socket socket, HashMap<String, ClientHandler> ch, List<String> unread_messages) throws IOException, InterruptedException {
             this.clientSocket = socket;
-            registration_handler = new registrator("C:\\Users\\marti\\OneDrive\\Plocha\\bin_tree.java\\zapoctak\\server\\data\\data.txt");
+            registration_handler = new registrator(PATH_FOR_DATA + "\\data.txt");
             chatters = ch;
             input = new DataInputStream(clientSocket.getInputStream());
             output = new DataOutputStream(clientSocket.getOutputStream());
             this.unread_messages = unread_messages;
-            System.out.println(unread_messages);
+    //        System.out.println(unread_messages);
         }
 
         /**
@@ -135,16 +162,16 @@ public class Server {
                     break; // End of stream, client has disconnected
                 }
                 String message = new String(buffer, 0, bytesRead);
-                System.out.println("Client: " + message);
+      //          System.out.println("Client: " + message);
 
                 if (!registration_handler.logged) { // Expecting correct login details
-                    System.out.println("funguju a nemám");
                     handle_log_or_registration(message, registration_handler);
-                    handle_unread_messages();
+                    if (registration_handler.logged)
+                        handle_unread_messages();
                 } else {
-                    int podm = handle_chatWindow_request(message);
-                    if (podm == MSG) {
-                        System.out.println("Running");
+                    int condition = handle_chatWindow_request(message);
+                    if (condition == MSG) {
+      //                  System.out.println("Running");
                         handle_sending_messages(message);
                     }
                     // TODO: Handle messages
@@ -160,39 +187,35 @@ public class Server {
          * @throws IOException If an I/O error occurs when sending a message to the other user.
          */
         public int handle_chatWindow_request(String message) throws IOException {
-            System.out.println("spustil jsem se");
+   //         System.out.println("I started");
             String[] tokens = message.split("\\s+");
-            if (tokens[0].equals("req") ) {
-       //         System.out.println("spustil jsem se + req " + registration_handler.is_registered(tokens[1].split(" ")) + " už je acc: " +
-       //        history.can_send_request(userName, message, registration_handler));
-
+            if (tokens[0].equals("req") && tokens.length == 2) {
                 if (registration_handler.is_registered(tokens[1].split(" ")) &&
-                     history.can_send_request(userName, message, registration_handler)) {
+                        history.can_send_request(userName, message, registration_handler)) {
 
                     history.write_history(userName, tokens[1], message);
                     send_message(tokens[1], message);
-                    System.out.println("koretní");
+                    System.out.println("Correct");
                     return MSG_REQUEST_CORRECT;
-                
-                }else  if (!registration_handler.is_registered(tokens[1].split(" "))) {
+
+                } else if (!registration_handler.is_registered(tokens[1].split(" "))) {
                     output.write("User you are trying to reach does not exist".getBytes());
                     output.flush();
-                    System.out.println("cilový user neexistuje"); 
+                    System.out.println("Target user does not exist");
 
-                }
-                else if (!history.can_send_request(userName, message, registration_handler)) {
-                    System.out.println("už si píšete");
+                } else if (!history.can_send_request(userName, message, registration_handler)) {
+                    System.out.println("You are already chatting");
 
                     output.write("You and user are already friends :)".getBytes());
                     output.flush();
                 }
-                System.out.println("what the fuck");
+                System.out.println("What happened");
                 return MSG_REQUEST_INCORRECT;
             }
             return MSG;
         }
-        
-         /**
+
+        /**
          * Handles sending messages between clients and other related operations.
          *
          * @param message The message to be processed and sent.
@@ -200,69 +223,97 @@ public class Server {
          * @throws InterruptedException If the current thread is interrupted while waiting.
          */
         public void handle_sending_messages(String message) throws IOException, InterruptedException {
-    
+
             String[] tokens = message.split("\\s+");
-            
-            if ((tokens[0].equals("acc") || tokens[0].equals("window")
-                    || tokens[0].equals("hist")) && tokens.length != 2) { // tady by ještě mohlo nastat, že píšeme někomu kdo neexistuje
+
+            if (((tokens[0].equals("acc") || tokens[0].equals("window")
+                    || tokens[0].equals("hist")) && tokens.length != 2) || message.isEmpty()) { // Here, it could also occur that we are writing to someone who does not exist
                 output.write("Incorrect message/command format".getBytes());
                 output.flush();
                 return;
             }
-
             String target_client_username = tokens[1];
             String mess_string = "";
 
-            if (tokens[0].equals("acc")) { // zjisti jestli poslední zpráva byl request
+            handle_sending_messages_inner(tokens, mess_string, target_client_username);
+        }
+
+        /**
+         * Handles the process of sending messages internally based on the provided tokens and message string.
+         *
+         * @param tokens                The tokens containing splitted message
+         * @param mess_string           The message string to be sent
+         * @param target_client_username The username of the target client
+         * @throws IOException if an I/O error occurs while sending or receiving data
+         * @throws InterruptedException if the thread is interrupted while waiting
+         */
+        public void handle_sending_messages_inner(String[] tokens, String mess_string, String target_client_username) throws IOException, InterruptedException {
+            if (tokens[0].equals("acc")) { // check if the last message was a request
                 if (!history.can_accept_request(userName, target_client_username)) {
                     output.write("Incorrect usage of acc".getBytes());
                     output.flush();
                     return;
-                } 
-                else {
+                } else {
                     mess_string = "acc " + target_client_username;
                     accept_request(tokens, true);
                 }
-
-            } else if (tokens[0].equals("hist")) { // historie je ve formátu "hist target"
+            } else if (tokens[0].equals("hist")) { // history is in the format "hist target"
                 history.get_user_to_user_history(userName, target_client_username, output);
-
-            } else if (tokens[0].equals("window")) { // jestli je req a pak acc
-                if (history.can_open_window(userName, target_client_username)) {
-                    accept_request(tokens, false);
-                    return;
-                } else {
-                    return;
-                }
-
-            } 
-            else if (history.can_open_window(userName,tokens[0])) {
-                target_client_username = tokens[0];
-                mess_string = "";     
-                System.out.println("tuto je klient: " + target_client_username);
-
-                for (int i = 1; i < tokens.length; i++) {
-                    mess_string += tokens[i] + " ";
-                }
-                send_message(target_client_username, mess_string);
+                return;
+            } else if (tokens[0].equals("window")) { // if it's a req and then an acc
+                handle_window_request(target_client_username, tokens);
+                return;
+            } else if (history.can_open_window(userName, tokens[0])) {
+                send_message_to_target(tokens);
+                return;
             }
-            System.out.println("toto je target: " + tokens[0]);
-
             history.write_history(userName, target_client_username, mess_string);
         }
 
+        /**
+         * Sends a message to the target client based on the provided tokens.
+         *
+         * @param tokens The tokens containing information about the message
+         * @throws IOException if an I/O error occurs while sending or receiving data
+         */
+        public void send_message_to_target(String[] tokens) throws IOException {
+            String target_client_username = tokens[0];
+            String mess_string = "";
+
+            for (int i = 1; i < tokens.length; i++) {
+                mess_string += tokens[i] + " ";
+            }
+            send_message(target_client_username, mess_string);
+            history.write_history(userName, target_client_username, mess_string);
+        }
+
+        /**
+         * Handles the window request for the target client.
+         *
+         * @param target_client_username The username of the target client
+         * @param tokens                 The tokens containing information about the request
+         * @throws IOException if an I/O error occurs while sending or receiving data
+         */
+        public void handle_window_request(String target_client_username, String[] tokens) throws IOException {
+            if (history.can_open_window(userName, target_client_username)) {
+                accept_request(tokens, false);
+                return;
+            } else {
+                return;
+            }
+        }
 
         /**
          * Accepts a request from a client to initiate a chat session.
          *
-         * @param tokens                               The message tokens containing necessary information.
-         * @param first_time_chatting_between_2_users Indicates if it's the first time chatting between two users.
+         * @param tokens                                The message tokens containing necessary information.
+         * @param first_time_chatting_between_2_users  Indicates if it's the first time chatting between two users.
          * @throws IOException If an I/O error occurs when sending a message to the other client.
          */
         public void accept_request(String[] tokens,
-                                    boolean first_time_chatting_between_2_users) throws IOException {
+                                   boolean first_time_chatting_between_2_users) throws IOException {
             String mess_string = "";
-            System.out.println("acc funguje ");
+            System.out.println("Accept is working ");
             String target_client_username = tokens[1];
 
             if (first_time_chatting_between_2_users) {
@@ -273,40 +324,36 @@ public class Server {
                 target_client_username = userName;
             }
             send_message(target_client_username, mess_string);
-            /* 
-            output.write((userName + " uacc " + target_client_username).getBytes());
-            output.flush();
-            */
         }
 
         /**
          * Handles unread messages for the client. If client gets some messages, but isn't
-         * currently online
+         * currently online, we will send them to him/her when he/she gets online.
          *
-         * @throws IOException            If an I/O error occurs when sending a message to the client.
+         * @throws IOException If an I/O error occurs when sending a message to the client.
          * @throws InterruptedException If the current thread is interrupted while waiting.
          */
         public void handle_unread_messages() throws IOException, InterruptedException {
             String[] tokens;
             boolean open = false;
-            ArrayList<String> to_delete= new ArrayList<>(); 
-            
-            /*  we need to delete messages that we have 
+            ArrayList<String> to_delete = new ArrayList<>();
+
+            /*  we need to delete messages that we have
                 already sent*/
 
             for (String message : unread_messages) {
                 tokens = message.split(";");
-                if (tokens[1].equals(userName)) { // chces formát odkoho - komu - cas - message
-                    System.out.println(userName + " dostal zprávu: " + tokens[0] + " " + tokens[2] + " " + tokens[3]);
+                if (tokens[1].equals(userName)) {
+                    System.out.println(userName + " received a message: " + tokens[0] + " " + tokens[2] + " " + tokens[3]);
 
-                    if (!open && history.can_open_window(userName, tokens[2])) { 
+                    if (!open && history.can_open_window(userName, tokens[2])) {
                         output.write((userName + " wacc " + tokens[0]).getBytes());
                         output.flush();
                         open = true;
                     }
                     TimeUnit.MILLISECONDS.sleep(500);
 
-                    output.write(( tokens[2]+ " "+ tokens[0] + " " + tokens[3]).getBytes());
+                    output.write((tokens[2] + " " + tokens[0] + " " + tokens[3]).getBytes());
                     output.flush();
                     to_delete.add(message);
                 }
@@ -341,7 +388,7 @@ public class Server {
             // Note: Ideally you want all these in a try/catch/finally block
             OutputStream os = target_socket.getOutputStream();
             DataOutputStream osw = new DataOutputStream(os);
-            osw.write((formatter.format(date) + " " + userName  + " " + mess_string).getBytes());
+            osw.write((formatter.format(date) + " " + userName + " " + mess_string).getBytes());
             osw.flush();
         }
 
@@ -351,14 +398,14 @@ public class Server {
          * @param message              The message containing login or registration details.
          * @param registration_handler The registration handler object.
          * @throws IOException If an I/O error occurs when sending a message to the client.
+         * @return {@code true} If user was logged in sucessfully, {@code false} otherwise.
          */
-        public void handle_log_or_registration(String message, registrator registration_handler) throws IOException {
+        public boolean handle_log_or_registration(String message, registrator registration_handler) throws IOException {
             String[] tokens = message.split("\\s+");
             userName = tokens[0];
-            passWord = tokens[1];
-            chatters.put(userName, this); // todle by mělo být asi v loginu
-            registration_handler.log_user(tokens, userName, passWord, output);
+            chatters.put(userName, this);
+            return registration_handler.log_user(tokens, output);
         }
 
-    } 
+    }
 }

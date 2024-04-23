@@ -1,7 +1,4 @@
-/**
- * A window for individual chat sessions between users.
- * Extends the ChatAppGUI class to inherit GUI components and functionality.
- */
+
 package zpct.GUI;
 
 import javax.swing.*;
@@ -9,6 +6,11 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+
+/**
+ * A window for individual chat sessions between users.
+ * Extends the ChatAppGUI class to inherit GUI components and functionality.
+ */
 
 public class ChatWindow extends ChatAppGUI {
 
@@ -65,7 +67,7 @@ public class ChatWindow extends ChatAppGUI {
     @Override
     void sendMessage() throws IOException {
         String message = messageField.getText();
-        System.out.println(message);
+    //    System.out.println(message);
         if (!message.isEmpty()) {
             chatArea.append("You: " + message + "\n"); // Display sent message in the chatArea
             output.write((to + " " + message).getBytes());

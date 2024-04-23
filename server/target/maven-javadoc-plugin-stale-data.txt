@@ -1,0 +1,50 @@
+@options
+@packages
+-encoding
+'UTF-8'
+-protected
+-source
+'1.8'
+-sourcepath
+'c:/Users/marti/OneDrive/Plocha/bin_tree.java/zapoctak/server/src/main/java'
+-author
+-bottom
+'Copyright &#169; 2024. All rights reserved.'
+-charset
+'UTF-8'
+-d
+'c:/Users/marti/OneDrive/Plocha/bin_tree.java/zapoctak/server/target/site/apidocs'
+-docencoding
+'UTF-8'
+-doctitle
+'server 1.0-SNAPSHOT API'
+-linkoffline
+'https://docs.oracle.com/javase/8/docs/api' 'c:/Users/marti/OneDrive/Plocha/bin_tree.java/zapoctak/server/target/javadoc-bundle-options'
+-use
+-version
+-windowtitle
+'server 1.0-SNAPSHOT API'
+server
+server.Server.history
+server.Server
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\server\src\main\java = 1707921382051
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\server\target\site\apidocs\allclasses-index.html = 1713886274772
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\server\target\site\apidocs\allpackages-index.html = 1713886274777
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\server\target\site\apidocs\copy.svg = 1713886274855
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\server\target\site\apidocs\element-list = 1713886274627
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\server\target\site\apidocs\help-doc.html = 1713886274841
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\server\target\site\apidocs\index-all.html = 1713886274810
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\server\target\site\apidocs\index.html = 1713886274741
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\server\target\site\apidocs\link.svg = 1713886274857
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\server\target\site\apidocs\member-search-index.js = 1713886274784
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\server\target\site\apidocs\module-search-index.js = 1713886274779
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\server\target\site\apidocs\overview-summary.html = 1713886274819
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\server\target\site\apidocs\overview-tree.html = 1713886274735
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\server\target\site\apidocs\package-search-index.js = 1713886274781
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\server\target\site\apidocs\script.js = 1713886274851
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\server\target\site\apidocs\search-page.js = 1713886274870
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\server\target\site\apidocs\search.html = 1713886274815
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\server\target\site\apidocs\search.js = 1713886274868
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\server\target\site\apidocs\stylesheet.css = 1713886274845
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\server\target\site\apidocs\tag-search-index.js = 1713886274786
+c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\server\target\site\apidocs\type-search-index.js = 1713886274782

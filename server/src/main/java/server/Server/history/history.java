@@ -6,26 +6,36 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.SimpleDateFormat;  
-import java.util.Date;  
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 import server.Server.registrator;
 
 /**
- * Provides methods for managing chat history.
+ * Provides methods for managing chat history. It stores messages from all users in one text file,
+ * where each message is stored in format: "sender;receiver;date;time;message".
  */
 public class history {
     static Scanner sc;
     static BufferedWriter writer;
 
-
-    final static String DATA = "C:\\Users\\marti\\OneDrive\\Plocha\\bin_tree.java\\zapoctak\\server\\src\\main\\java\\server\\Server\\history\\history.txt";
+    static String DATA;
     static final int USER1_INDEX = 0;
     static final int USER2_INDEX = 1;
     static final int TIME_INDEX = 2;
     static final int MESSAGE_START_INDEX = 3;
+
+
+    /**
+     * Initiates data.
+     * 
+     * @param path_for_data path to said data
+     */
+    public static void init_Data(String path_for_data) {
+        DATA = path_for_data;
+    }
 
     /**
      * Writes a chat message to the history file.
@@ -43,7 +53,7 @@ public class history {
 
         writer.write(user1 + ";" + user2 + ";" + formatter.format(date) + ";" + msg);
         writer.newLine();
-        System.out.println("Line added to the file.");
+     //   System.out.println("Line added to the file.");
         writer.close();
     }
 
@@ -60,22 +70,25 @@ public class history {
                                                 DataOutputStream output) throws IOException, InterruptedException {
         String line = "";
         sc = new Scanner(new File(DATA));
+        if (!can_open_window(your_username, user2_username)) {
+            return;
+        }
+
         while (sc.hasNextLine()) {
             line = sc.nextLine();
             String[] splitted_line = line.split(";");
-            if (correct_line(your_username, user2_username, splitted_line)) {
-                output.write((splitted_line[TIME_INDEX] + " " +
-                        splitted_line[USER1_INDEX] + ": " +
+            if (correct_line_hist(your_username, user2_username, splitted_line)) {
+                output.write((user2_username + " " + splitted_line[TIME_INDEX] + " " +
+                        splitted_line[USER1_INDEX] + " " +
                         get_msg(splitted_line)).getBytes());
                 output.flush();
-                TimeUnit.MILLISECONDS.sleep(5);
-
+                TimeUnit.MILLISECONDS.sleep(300);
             }
         }
     }
 
     /**
-     * Checks if there is chat history between two users.
+     * Checks if there was sent request by one user and then it was accepted by other user.
      *
      * @param your_username  Your username.
      * @param user2_username The username of the other user.
@@ -96,9 +109,16 @@ public class history {
         return false;
     }
 
-
-    public static boolean can_send_request(String your_username,
-                         String target_username, registrator req) throws IOException {
+    /**
+     * Checks if a request can be sent from the specified sender to the target user.
+     *
+     * @param your_username the username of the sender
+     * @param target_username the username of the target user
+     * @param req the registrator object
+     * @return {@code true} if the request can be sent, {@code false} otherwise
+     * @throws IOException if an I/O error occurs while reading the data file
+     */
+    public static boolean can_send_request(String your_username, String target_username, registrator req) throws IOException {
         String line = "";
         sc = new Scanner(new File(DATA));
 
@@ -106,12 +126,22 @@ public class history {
             line = sc.nextLine();
             String[] splitted_line = line.split(";");
             if (correct_line_req(your_username, target_username, splitted_line, req)) {
+  //              System.out.println("lajna z history: " + line);
                 return false;
             }
         }
         return true;
     }
 
+    /**
+     * Checks if a request from the specified sender to the target user can be accepted. It checks
+     * if request to this user was sent from other user.
+     *
+     * @param your_username the username of the sender
+     * @param target_username the username of the target user
+     * @return {@code true} if the request can be accepted, {@code false} otherwise
+     * @throws IOException if an I/O error occurs while reading the data file
+     */
     public static boolean can_accept_request(String your_username, String target_username) throws IOException {
         String line = "";
         sc = new Scanner(new File(DATA));
@@ -126,24 +156,28 @@ public class history {
         return false;
     }
 
-     public static boolean correct_line_acc(String user1, String user2 ,String[] splitted_line) {
-        if (!(splitted_line.length == 4 && splitted_line[MESSAGE_START_INDEX].split(" ").length ==2)) {
+    /**
+     * Checks if the specified line from the history file represents request sent from user1 to user2.
+     *
+     * @param user1 the username of one user involved in the request
+     * @param user2 the username of the other user involved in the request
+     * @param splitted_line line splitted by ";"
+     * @return {@code true} if the request can be accepted, {@code false} otherwise
+     */
+    public static boolean correct_line_acc(String user1, String user2, String[] splitted_line) {
+        if (!(splitted_line.length == 4 && splitted_line[MESSAGE_START_INDEX].split(" ").length == 2)) {
             return false;
         }
-        System.out.println("aaaaaaaaaaaaaaa");
-        System.out.println(splitted_line[USER1_INDEX].equals(user2) + " " +
-            splitted_line[USER2_INDEX].equals(user1) + " " +
-            splitted_line[MESSAGE_START_INDEX].split(" ")[0].equals("req") + " " +  
-            splitted_line[MESSAGE_START_INDEX].split(" ")[1].equals(user1));
 
         return (splitted_line[USER1_INDEX].equals(user2) &&
-                splitted_line[USER2_INDEX].equals(user1) && 
-                splitted_line[MESSAGE_START_INDEX].split(" ")[0].equals("req") && 
+                splitted_line[USER2_INDEX].equals(user1) &&
+                splitted_line[MESSAGE_START_INDEX].split(" ")[0].equals("req") &&
                 splitted_line[MESSAGE_START_INDEX].split(" ")[1].equals(user1));
     }
 
+
     /**
-     * Checks if a line in the history contains message with "acc". This holds if and only if 
+     * Checks if a line in the history contains message with "acc". This holds if and only if
      * request for chatting was sent from one user and accepted by other.
      *
      * @param user1         The username of one user.
@@ -163,25 +197,43 @@ public class history {
                         splitted_line[USER1_INDEX].equals(user2))) &&  splitted_line[MESSAGE_START_INDEX].split(" ")[0].equals("acc");
     }
 
-    public static boolean correct_line_req(String user1, String user2, String[] splitted_line,registrator reg) throws IOException {
+    /**
+     * Checks if the specified line from the history file represents message sent from user1 to user2.
+     *
+     * @param user1 the username of one user involved in the conversation
+     * @param user2 the username of the other user involved in the conversation
+     * @param splitted_line the array containing the split components of the line
+     * @return {@code true} if the line represents a correct history entry, {@code false} otherwise
+     */
+    public static boolean correct_line_hist(String user1, String user2, String[] splitted_line) {
+        return ((splitted_line[USER1_INDEX].equals(user1) &&
+                splitted_line[USER2_INDEX].equals(user2)) ||
+                (splitted_line[USER2_INDEX].equals(user1) &&
+                splitted_line[USER1_INDEX].equals(user2)));
+    }
 
-        if (!(splitted_line.length == 4 && splitted_line[MESSAGE_START_INDEX].split(" ").length ==2)) {
+    /**
+     * Checks if the specified line from the history file represents a correct request.
+     *
+     * @param user1 the username of one user involved in the request
+     * @param user2 the username of the other user involved in the request
+     * @param splitted_line the array containing the split components of the line
+     * @param reg the registrator object
+     * @return {@code true} if the line represents a correct request, {@code false} otherwise
+     * @throws IOException if an I/O error occurs while reading the data file
+     */
+    public static boolean correct_line_req(String user1, String user2, String[] splitted_line, registrator reg) throws IOException {
+        if (!(splitted_line.length == 4 && splitted_line[MESSAGE_START_INDEX].split(" ").length == 2)) {
             return false;
         }
-        boolean b = ((splitted_line[USER1_INDEX].equals(user2) &&
-        splitted_line[USER2_INDEX].equals(user1)) || 
-        (splitted_line[USER1_INDEX].equals(user1) &&
-        splitted_line[USER2_INDEX].equals(user2))) &&
-        splitted_line[MESSAGE_START_INDEX].split(" ")[0].equals("acc") && 
-        splitted_line[MESSAGE_START_INDEX].split(" ")[1].equals(user1);
-        System.out.println("hist podm: " + b);
         return ((splitted_line[USER1_INDEX].equals(user2) &&
-                splitted_line[USER2_INDEX].equals(user1)) || 
+                splitted_line[USER2_INDEX].equals(user1)) ||
                 (splitted_line[USER1_INDEX].equals(user1) &&
                 splitted_line[USER2_INDEX].equals(user2))) &&
-                splitted_line[MESSAGE_START_INDEX].split(" ")[0].equals("acc") && 
+                splitted_line[MESSAGE_START_INDEX].split(" ")[0].equals("acc") &&
                 splitted_line[MESSAGE_START_INDEX].split(" ")[1].equals(user1);
     }
+
     /**
      * Extracts the message content from a line of chat history.
      *
@@ -193,7 +245,7 @@ public class history {
         for (int i = MESSAGE_START_INDEX; i < line.length; i++) {
             result += line[i] += "; ";
         }
-        System.out.println(result);
+    //    System.out.println(result);
         return result;
     }
 }

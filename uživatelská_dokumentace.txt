@@ -1,0 +1,41 @@
+Client side
+
+We will run client side by running following command in command line "javac path/app.java [portNumber] [host]". Where path is
+path to ...
+
+After there will popup window in which we either login or we can registrate. In both case we simply enter
+our data and than click "OK".
+
+If we succesfully logged in, terminal window will popup. This is for sending commands to server. 
+
+    Commands:
+        - "req [Username]"
+            - this command sends chat request to user with specified username (if user exists).
+
+        - "acc [Username]"
+            - If specified user send us chat request then 
+              this command accepts chat request from user with specified username. This means
+              that we will be able to initiate chat session with specified user.
+
+            - If specified user didn't send us chat request,
+              than terminal will write "Incorrect usage of acc". At this point we cannot
+              initiate chat session with specifed user.
+
+        - "window [Username]"
+            - If between us and specified user was send chat request and then was
+              this request by its reciever accepted, then this command will open new
+              window. This newly opened window serves to chat between us and specified user.
+              If we want to send message to specified user we simply enter it into window and
+              click "send".
+        
+        - "hist [Username]"
+            - This will send us full chat history between us and specifed user. It will be written on 
+              chat window between us and specifed user.
+
+Note: if we close any window, the app will shut down.
+
+Server side
+
+We will run client side by running following command in command line "javac path/app.java [portNumber] [DataPath]". Where path is
+path to .... DataPath is path in which we would like to store data. By data I mean "history.txt" which contains every
+message that was sent between 2 users in format "sender;reciever;date;time;message"and "data.txt" which stores data about registered users in format "username;password;name;surname".

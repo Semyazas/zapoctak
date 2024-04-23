@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="zpct.AppTest" time="1.256" tests="4" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="zpct.AppTest" time="0.626" tests="3" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="21"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -15,7 +15,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="CZ"/>
     <property name="sun.boot.library.path" value="C:\Program Files\Java\jdk-21.0.2\bin"/>
-    <property name="sun.java.command" value="C:\Users\marti\AppData\Local\Temp\surefire12742949522235583972\surefirebooter8775717165580185744.jar C:\Users\marti\AppData\Local\Temp\surefire12742949522235583972 2024-04-20T21-14-25_157-jvmRun1 surefire1555499445795042307tmp surefire_016318368810640793070tmp"/>
+    <property name="sun.java.command" value="C:\Users\marti\AppData\Local\Temp\surefire4951441184056326546\surefirebooter735852773389816923.jar C:\Users\marti\AppData\Local\Temp\surefire4951441184056326546 2024-04-23T16-16-55_721-jvmRun1 surefire14610609345702472875tmp surefire_014683393658301065696tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\chatapp\target\test-classes;c:\Users\marti\OneDrive\Plocha\bin_tree.java\zapoctak\chatapp\target\classes;C:\Users\marti\.m2\repository\junit\junit\4.11\junit-4.11.jar;C:\Users\marti\.m2\repository\org\hamcrest\hamcrest-core\1.3\hamcrest-core-1.3.jar;C:\Users\marti\.m2\repository\org\openjfx\javafx-controls\17.0.1\javafx-controls-17.0.1.jar;C:\Users\marti\.m2\repository\org\openjfx\javafx-controls\17.0.1\javafx-controls-17.0.1-win.jar;C:\Users\marti\.m2\repository\org\openjfx\javafx-graphics\17.0.1\javafx-graphics-17.0.1.jar;C:\Users\marti\.m2\repository\org\openjfx\javafx-graphics\17.0.1\javafx-graphics-17.0.1-win.jar;C:\Users\marti\.m2\repository\org\openjfx\javafx-base\17.0.1\javafx-base-17.0.1.jar;C:\Users\marti\.m2\repository\org\openjfx\javafx-base\17.0.1\javafx-base-17.0.1-win.jar;"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -30,7 +30,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
-    <property name="surefire.real.class.path" value="C:\Users\marti\AppData\Local\Temp\surefire12742949522235583972\surefirebooter8775717165580185744.jar"/>
+    <property name="surefire.real.class.path" value="C:\Users\marti\AppData\Local\Temp\surefire4951441184056326546\surefirebooter735852773389816923.jar"/>
     <property name="user.script" value=""/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="21.0.2+13-LTS-58"/>
@@ -58,8 +58,7 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="65.0"/>
   </properties>
-  <testcase name="RegistrationAndLoginTest" classname="zpct.AppTest" time="0.053"/>
-  <testcase name="RequestHandling_CORRECT_USAGE" classname="zpct.AppTest" time="0.623"/>
-  <testcase name="RegistrationAndLoginTest_INCORRECT_PASSWORD" classname="zpct.AppTest" time="0.015"/>
-  <testcase name="RequestHandling_INCORRECT_USAGE" classname="zpct.AppTest" time="0.51"/>
+  <testcase name="RegistrationAndLoginTest" classname="zpct.AppTest" time="0.065"/>
+  <testcase name="RegistrationAndLoginTest_INCORRECT_PASSWORD" classname="zpct.AppTest" time="0.005"/>
+  <testcase name="RequestHandling_INCORRECT_USAGE" classname="zpct.AppTest" time="0.514"/>
 </testsuite>

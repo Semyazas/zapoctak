@@ -1,7 +1,3 @@
-/**
- * A GUI application for user login and registration.
- * Allows users to log in or register for the chat application.
- */
 package zpct.GUI;
 
 import javax.swing.*;
@@ -12,6 +8,10 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+
+/**
+ * LoginRegistrationGUI class allows users to log in or register for the chat application.
+ */
 
 public class LoginRegistrationGUI extends JFrame {
 

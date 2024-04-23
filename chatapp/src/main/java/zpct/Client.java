@@ -13,7 +13,7 @@ import zpct.GUI.LoginRegistrationGUI;
 
 /**
  * This class represents the client-side of a socket-based chat application.
- * It connects to a server, handles login functionality, and initializes the GUI.
+ * It connects to a server, handles login functionality (using LoginRegistrationGUI), and initializes the GUI.
  */
 public class Client {
 
@@ -22,18 +22,18 @@ public class Client {
     static DataOutputStream output;
 
     /**
-     * Constructor for the Client class.
+     * Constructor for the Client class. It calls login function and if login is successfull,
+     * then it opens command terminal.
      */
-    public Client() {
+    public Client(int port,String host) {
 
         try {
-            socket = new Socket("localhost", 12345);
+            socket = new Socket(host, port);
 
             input = socket.getInputStream();
             output = new DataOutputStream(socket.getOutputStream());
 
             String username = logIn();
-
             // Initialize the GUI on the Event Dispatch Thread
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
@@ -47,16 +47,16 @@ public class Client {
             
         } catch (IOException i) {
             System.out.println(i);
-            System.out.println("server je vypnutý");
+            System.out.println("Server is offline");
             return;
         }
-        // TODO: oprav registraci ... bug: pokud se zaregistruju, tak registrace nezmizí
     }
 
     /**
      * Handles the login process with the server.
      *
      * @throws IOException if an I/O error occurs while communicating with the server.
+     * @return returns username of client
      */
     public static String logIn() throws IOException {
         while (true) {
@@ -69,9 +69,9 @@ public class Client {
                 break; // End of stream, client has disconnected
             }
             String message = new String(buffer, 0, bytesRead);
-            System.out.println("Client: " + message);
-            if (message.equals("LOGIN SUCCESSFULL")) {
-                System.out.println("todle je username:" + l.username);
+  //          System.out.println("Client: " + message);
+            if (message.equals("LOGIN SUCCESSFUL")) {
+   //             System.out.println("todle je username:" + l.username);
                 return l.username;
             }
         }

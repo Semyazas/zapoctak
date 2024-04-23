@@ -8,6 +8,7 @@
 
 package server;
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 import server.Server.*;
 
@@ -22,12 +23,18 @@ public class ServerApp {
      * The main method of the ServerApp class.
      * It creates an instance of the Server class to start the server application.
      * 
-     * @param args command line arguments (not used)
+     * @param args args[0] is port and args[1] is path in which we store data
      * @throws IOException if an I/O error occurs while starting the server
      * @throws InterruptedException if the thread is interrupted while starting the server
      */
     public static void main(String[] args) throws IOException, InterruptedException {
-        new Server();
+        Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
+
+        if (args.length == 2 && pattern.matcher(args[0]).matches()) {
+            new Server(Integer.parseInt(args[0]),args[1]); // Start the client application
+        } else {
+            System.out.println("Invalid input");
+        }
     }
 }
     
