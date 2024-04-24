@@ -21,6 +21,8 @@ public class ChatAppGUI extends JFrame {
     private final int COMMAND_INDEX         = 3;
     private final int MESSAGE_TARGET_INDEX  = 2;
 
+    
+
     protected JTextArea chatArea;
     protected JTextField messageField;
 

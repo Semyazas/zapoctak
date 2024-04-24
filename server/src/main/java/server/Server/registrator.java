@@ -21,6 +21,8 @@ public class registrator {
     private final Boolean CHECK_FOR_LOG = true;
     private final Boolean CHECK_FOR_REGISTRATION = false;
     private final int USERNAME_INDEX = 0;
+    private final int PASSWORD_INDEX = 1;
+
     private final int REGISTRATION_LENGTH = 4;
     private final int LOGIN_LENGTH = 2;
 
@@ -87,11 +89,12 @@ public class registrator {
     private boolean tokensInLine(String[] tokens, String line, boolean regOrLog) {
         String[] splLine = line.split(";");
         if (regOrLog == CHECK_FOR_LOG) {
-            if (splLine[0].equals(tokens[0]) && splLine[1].equals(tokens[1])) {
+            if (splLine[USERNAME_INDEX].equals(tokens[USERNAME_INDEX]) &&
+                splLine[PASSWORD_INDEX].equals(tokens[PASSWORD_INDEX])) {
                 return true;
             }
         } else if (regOrLog == CHECK_FOR_REGISTRATION) {
-            if (splLine[0].equals(tokens[0])) {
+            if (splLine[USERNAME_INDEX].equals(tokens[USERNAME_INDEX])) {
                 return true;
             }
         }

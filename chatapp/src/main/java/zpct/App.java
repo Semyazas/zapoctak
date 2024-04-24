@@ -14,13 +14,15 @@ public class App {
      *
      * @param args args[0] tells which port to use and args[1] which host to use
      */
+    static final int number_of_args = 2;
+    static final int port_index = 0;
+    static final int host_index = 1;
     public static void main(String[] args) {
         Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
 
-        if (args.length == 2 && pattern.matcher(args[0]).matches()) {
-            new Client(Integer.parseInt(args[0]),args[1]); // Start the client application
+        if (args.length == number_of_args && pattern.matcher(args[port_index]).matches()) {
+            new Client(Integer.parseInt(args[port_index]),args[host_index]); // Start the client application
         } else {
-            new Client(Integer.parseInt("12345"),"localhost"); // Start the client application
             System.out.println("Invalid input");
         }
     }

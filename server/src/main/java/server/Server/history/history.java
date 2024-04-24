@@ -26,6 +26,10 @@ public class history {
     static final int USER2_INDEX = 1;
     static final int TIME_INDEX = 2;
     static final int MESSAGE_START_INDEX = 3;
+    static final int COMMAND_LENGTH = 2;
+    static final int FULL_LINE_LENGTH = 4;
+    static final int COMMAND_INDEX = 0;
+    static final int TARGET_INDEX = 1;
 
 
     /**
@@ -165,14 +169,15 @@ public class history {
      * @return {@code true} if the request can be accepted, {@code false} otherwise
      */
     public static boolean correct_line_acc(String user1, String user2, String[] splitted_line) {
-        if (!(splitted_line.length == 4 && splitted_line[MESSAGE_START_INDEX].split(" ").length == 2)) {
+        if (!(splitted_line.length == FULL_LINE_LENGTH && 
+            splitted_line[MESSAGE_START_INDEX].split(" ").length == COMMAND_LENGTH)) {
             return false;
         }
 
         return (splitted_line[USER1_INDEX].equals(user2) &&
                 splitted_line[USER2_INDEX].equals(user1) &&
-                splitted_line[MESSAGE_START_INDEX].split(" ")[0].equals("req") &&
-                splitted_line[MESSAGE_START_INDEX].split(" ")[1].equals(user1));
+                splitted_line[MESSAGE_START_INDEX].split(" ")[COMMAND_INDEX].equals("req") &&
+                splitted_line[MESSAGE_START_INDEX].split(" ")[TARGET_INDEX].equals(user1));
     }
 
 
@@ -187,7 +192,8 @@ public class history {
      */
     public static boolean correct_line(String user1, String user2, String[] splitted_line) {
 
-        if (!(splitted_line.length == 4 && splitted_line[MESSAGE_START_INDEX].split(" ").length ==2)) {
+        if (!(splitted_line.length == FULL_LINE_LENGTH && 
+            splitted_line[MESSAGE_START_INDEX].split(" ").length ==COMMAND_LENGTH)) {
             return false;
         }
 
@@ -223,15 +229,16 @@ public class history {
      * @throws IOException if an I/O error occurs while reading the data file
      */
     public static boolean correct_line_req(String user1, String user2, String[] splitted_line, registrator reg) throws IOException {
-        if (!(splitted_line.length == 4 && splitted_line[MESSAGE_START_INDEX].split(" ").length == 2)) {
+        if (!(splitted_line.length == FULL_LINE_LENGTH
+             && splitted_line[MESSAGE_START_INDEX].split(" ").length == COMMAND_LENGTH)) {
             return false;
         }
         return ((splitted_line[USER1_INDEX].equals(user2) &&
                 splitted_line[USER2_INDEX].equals(user1)) ||
                 (splitted_line[USER1_INDEX].equals(user1) &&
                 splitted_line[USER2_INDEX].equals(user2))) &&
-                splitted_line[MESSAGE_START_INDEX].split(" ")[0].equals("acc") &&
-                splitted_line[MESSAGE_START_INDEX].split(" ")[1].equals(user1);
+                splitted_line[MESSAGE_START_INDEX].split(" ")[COMMAND_INDEX].equals("acc") &&
+                splitted_line[MESSAGE_START_INDEX].split(" ")[TARGET_INDEX].equals(user1);
     }
 
     /**

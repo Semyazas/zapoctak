@@ -1,4 +1,0 @@
-Pepe2;123;Karel;Novak;
-Pepe3;123;Jan;Novak;
-okurka;123;a;b;
-pepe1;kokos;karel;novak;

@@ -97,6 +97,11 @@ public class Server {
         private final int MSG_REQUEST_INCORRECT = 1;
         private final int MSG = 2;
 
+        private final int COMMAND_LENGTH = 2;
+        private final int COMMAND_INDEX  = 0;
+        private final int TARGET_INDEX = 1;
+
+        private final int MSG_TARGET_INDEX = 0;
         /**
          * Constructs a ClientHandler object for a specific client connection.
          *
@@ -187,29 +192,23 @@ public class Server {
          * @throws IOException If an I/O error occurs when sending a message to the other user.
          */
         public int handle_chatWindow_request(String message) throws IOException {
-   //         System.out.println("I started");
             String[] tokens = message.split("\\s+");
-            if (tokens[0].equals("req") && tokens.length == 2) {
-                if (registration_handler.is_registered(tokens[1].split(" ")) &&
+            if (tokens[COMMAND_INDEX].equals("req") && tokens.length ==COMMAND_LENGTH) {
+                if (registration_handler.is_registered(tokens[TARGET_INDEX].split(" ")) &&
                         history.can_send_request(userName, message, registration_handler)) {
 
-                    history.write_history(userName, tokens[1], message);
-                    send_message(tokens[1], message);
-                    System.out.println("Correct");
+                    history.write_history(userName, tokens[TARGET_INDEX], message);
+                    send_message(tokens[TARGET_INDEX], message);
                     return MSG_REQUEST_CORRECT;
 
-                } else if (!registration_handler.is_registered(tokens[1].split(" "))) {
+                } else if (!registration_handler.is_registered(tokens[TARGET_INDEX].split(" "))) {
                     output.write("User you are trying to reach does not exist".getBytes());
                     output.flush();
-                    System.out.println("Target user does not exist");
 
                 } else if (!history.can_send_request(userName, message, registration_handler)) {
-                    System.out.println("You are already chatting");
-
                     output.write("You and user are already friends :)".getBytes());
                     output.flush();
                 }
-                System.out.println("What happened");
                 return MSG_REQUEST_INCORRECT;
             }
             return MSG;
@@ -226,13 +225,13 @@ public class Server {
 
             String[] tokens = message.split("\\s+");
 
-            if (((tokens[0].equals("acc") || tokens[0].equals("window")
-                    || tokens[0].equals("hist")) && tokens.length != 2) || message.isEmpty()) { // Here, it could also occur that we are writing to someone who does not exist
+            if (((tokens[COMMAND_INDEX].equals("acc") || tokens[COMMAND_INDEX].equals("window")
+                    || tokens[COMMAND_INDEX].equals("hist")) && tokens.length != COMMAND_LENGTH) || message.isEmpty()) { // Here, it could also occur that we are writing to someone who does not exist
                 output.write("Incorrect message/command format".getBytes());
                 output.flush();
                 return;
             }
-            String target_client_username = tokens[1];
+            String target_client_username = tokens[TARGET_INDEX];
             String mess_string = "";
 
             handle_sending_messages_inner(tokens, mess_string, target_client_username);
@@ -248,7 +247,7 @@ public class Server {
          * @throws InterruptedException if the thread is interrupted while waiting
          */
         public void handle_sending_messages_inner(String[] tokens, String mess_string, String target_client_username) throws IOException, InterruptedException {
-            if (tokens[0].equals("acc")) { // check if the last message was a request
+            if (tokens[COMMAND_INDEX].equals("acc")) { // check if the last message was a request
                 if (!history.can_accept_request(userName, target_client_username)) {
                     output.write("Incorrect usage of acc".getBytes());
                     output.flush();
@@ -257,13 +256,13 @@ public class Server {
                     mess_string = "acc " + target_client_username;
                     accept_request(tokens, true);
                 }
-            } else if (tokens[0].equals("hist")) { // history is in the format "hist target"
+            } else if (tokens[COMMAND_INDEX].equals("hist")) { // history is in the format "hist target"
                 history.get_user_to_user_history(userName, target_client_username, output);
                 return;
-            } else if (tokens[0].equals("window")) { // if it's a req and then an acc
+            } else if (tokens[COMMAND_INDEX].equals("window")) { // if it's a req and then an acc
                 handle_window_request(target_client_username, tokens);
                 return;
-            } else if (history.can_open_window(userName, tokens[0])) {
+            } else if (history.can_open_window(userName, tokens[MSG_TARGET_INDEX])) {
                 send_message_to_target(tokens);
                 return;
             }
@@ -277,7 +276,7 @@ public class Server {
          * @throws IOException if an I/O error occurs while sending or receiving data
          */
         public void send_message_to_target(String[] tokens) throws IOException {
-            String target_client_username = tokens[0];
+            String target_client_username = tokens[MSG_TARGET_INDEX];
             String mess_string = "";
 
             for (int i = 1; i < tokens.length; i++) {
@@ -313,8 +312,7 @@ public class Server {
         public void accept_request(String[] tokens,
                                    boolean first_time_chatting_between_2_users) throws IOException {
             String mess_string = "";
-            System.out.println("Accept is working ");
-            String target_client_username = tokens[1];
+            String target_client_username = tokens[TARGET_INDEX];
 
             if (first_time_chatting_between_2_users) {
                 mess_string = " acc " + target_client_username;
@@ -343,17 +341,15 @@ public class Server {
 
             for (String message : unread_messages) {
                 tokens = message.split(";");
-                if (tokens[1].equals(userName)) {
-                    System.out.println(userName + " received a message: " + tokens[0] + " " + tokens[2] + " " + tokens[3]);
-
+                if (tokens[TARGET_INDEX].equals(userName)) {
                     if (!open && history.can_open_window(userName, tokens[2])) {
-                        output.write((userName + " wacc " + tokens[0]).getBytes());
+                        output.write((userName + " wacc " + tokens[MSG_TARGET_INDEX]).getBytes());
                         output.flush();
                         open = true;
                     }
                     TimeUnit.MILLISECONDS.sleep(500);
 
-                    output.write((tokens[2] + " " + tokens[0] + " " + tokens[3]).getBytes());
+                    output.write((tokens[2] + " " + tokens[MSG_TARGET_INDEX] + " " + tokens[3]).getBytes());
                     output.flush();
                     to_delete.add(message);
                 }
@@ -373,12 +369,10 @@ public class Server {
          */
         public void send_message(String target_client_username, String mess_string) throws IOException {
             ClientHandler target_client = chatters.get(target_client_username);
-            System.out.println(target_client);
             SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
             Date date = new Date();
 
             if (target_client == null) {
-                System.out.println(target_client_username + " is offline");
                 unread_messages.add(userName + ";" + target_client_username +
                         ";" + formatter.format(date) + ";" + mess_string);
                 return;
@@ -402,10 +396,9 @@ public class Server {
          */
         public boolean handle_log_or_registration(String message, registrator registration_handler) throws IOException {
             String[] tokens = message.split("\\s+");
-            userName = tokens[0];
+            userName = tokens[MSG_TARGET_INDEX];
             chatters.put(userName, this);
             return registration_handler.log_user(tokens, output);
         }
-
     }
 }
